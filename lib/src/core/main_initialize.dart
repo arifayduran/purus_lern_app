@@ -5,6 +5,7 @@ import 'package:purus_lern_app/src/core/firebase/initialize_firebase.dart';
 import 'package:purus_lern_app/src/core/get_app_info.dart';
 import 'package:purus_lern_app/src/core/get_platform_as_string.dart';
 import 'package:purus_lern_app/src/core/presentation/rive_manager.dart';
+import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_pref/biometric_dont_ask_me_again_sharedpred.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_pref/biometric_sharedpref.dart';
 import 'package:purus_lern_app/src/features/authentication/application/local_auth/check_biometric_availability.dart';
@@ -12,8 +13,6 @@ import 'package:purus_lern_app/src/features/authentication/application/local_aut
 import 'package:purus_lern_app/src/features/authentication/data/shared_pref/onboarding_status_sharedpref.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_pref/stay_logged_in_sharedpref.dart';
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
-import 'package:purus_lern_app/src/features/chatbot/application/chatbot_random_message.dart';
-import 'package:purus_lern_app/src/features/chatbot/data/chatbot_current_message.dart';
 
 Future<void> initializeApp() async {
   currentPlatform = getPlatformAsString();
@@ -24,6 +23,7 @@ Future<void> initializeApp() async {
 
   // Auth
   isLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+  currentUser = await getAndRefreshCurrentUser();
   isOnboardingNotComplete =
       !await OnboardingStatusSharedpref().isOnboardingDone();
   isBiometricConfigured =
@@ -47,6 +47,4 @@ Future<void> initializeApp() async {
   debugPrint("availableBiometricsString: $availableBiometricsString");
 
   logAppStartEvent();
-
-  chatbotCurrentMessage = getRandomChatbotMessage();
 }

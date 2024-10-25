@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:purus_lern_app/src/config/gradients.dart';
+import 'package:purus_lern_app/src/features/chatbot/application/chatbot_random_message.dart';
+import 'package:purus_lern_app/src/features/chatbot/data/chatbot_current_message.dart';
 import 'package:purus_lern_app/src/widgets/my_animated_bottom_bar_widget.dart';
 
 import 'package:purus_lern_app/src/widgets/my_animated_top_bar_widget.dart';
@@ -25,6 +27,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    chatbotCurrentMessage = getRandomChatbotMessage();
+  }
 
   void _onTabSelected(int index) {
     setState(() {

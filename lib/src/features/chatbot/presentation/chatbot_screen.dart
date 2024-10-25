@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purus_lern_app/src/features/chatbot/application/chatbot_service.dart';
+import 'package:purus_lern_app/src/features/chatbot/presentation/daily_prompt_widget.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key, required this.firstRequest});
@@ -33,9 +34,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Purutus Chatbot')),
+      appBar: AppBar(
+        title: Text('Purutus Chatbot'),
+      ),
       body: Column(
         children: [
+          DailyPromptWidget(),
           Expanded(
               child: Padding(
             padding: const EdgeInsets.all(8.0),

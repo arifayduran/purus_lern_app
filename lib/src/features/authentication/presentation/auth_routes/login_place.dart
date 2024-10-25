@@ -8,9 +8,10 @@ import "package:flutter_svg/svg.dart";
 import "package:purus_lern_app/src/config/palette.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_errors.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_login.dart";
+import "package:purus_lern_app/src/core/moodle/get_user_info_from_login.dart";
 import "package:purus_lern_app/src/core/presentation/home_screen.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/refresh_biometric_state.dart";
-import "package:purus_lern_app/src/features/authentication/application/moodle/login_req.dart";
+import "package:purus_lern_app/src/core/moodle/login_req.dart";
 import "package:purus_lern_app/src/features/authentication/data/local_auth_assets.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_pref/biometric_dont_ask_me_again_sharedpred.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_pref/biometric_sharedpref.dart";
@@ -18,6 +19,7 @@ import "package:purus_lern_app/src/features/authentication/application/local_aut
 import "package:purus_lern_app/src/features/authentication/application/local_auth/local_auth_service.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_pref/stay_logged_in_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/data/login_conditions.dart";
+import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
 import "package:purus_lern_app/src/widgets/my_animated_checkmark.dart";
 import "package:purus_lern_app/src/widgets/my_button.dart";
 import "package:purus_lern_app/src/widgets/my_rotating_svg.dart";
@@ -116,12 +118,12 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   //   return _obscureText ? SFIcons.sf_eye_fill : SFIcons.sf_eye_slash_fill;
   // }
 
-  void _validation() {
+  void _validation() async {
     loginReq(_usernameController.text, _passwordController.text);
 
-    if (_usernameController.text == "admin") {
+    if (_usernameController.text == "arifayduran") {
       _isUsernameValid = true;
-      if (_passwordController.text == "0000") {
+      if (_passwordController.text == "Novum#125me") {
         _isPasswordCorrect = true;
       }
     }
@@ -134,9 +136,11 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
 
       TextInput.finishAutofillContext();
 
+      currentUser = await getUserinfoFromLogin(_usernameController.text);
+
       if (_stayLoggedBox) {
         isLoggedIn = true;
-        StayLoggedInSharedpref().setLoginStatus(_stayLoggedBox);
+        StayLoggedInSharedpref().setLoginStatus(_stayLoggedBox, currentUser!);
       }
 
       if (isBiometricAvailable.value &&

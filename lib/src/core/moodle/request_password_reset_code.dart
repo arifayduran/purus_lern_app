@@ -1,16 +1,17 @@
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
-import "package:purus_lern_app/src/features/authentication/application/moodle/auth_token.dart";
+import "package:purus_lern_app/src/core/moodle/moodle_config.dart";
+import "package:purus_lern_app/src/core/moodle/moodle_tokens.dart";
 
 Future<void> requestActivationCode(String identifier) async {
   final response = await http.post(
-    Uri.parse('https://purus-online.de/webservice/custom_generate_code.php'),
+    Uri.parse('$moodleUrl/webservice/custom_generate_code.php'),
     body: {
       'identifier': identifier,
     },
   );
 
-  if (response.statusCode == 200) {
+  if (response.statusCode >= 200 && response.statusCode < 300) {
     debugPrint('Aktivierungscode erfolgreich gesendet.');
   } else {
     debugPrint('Fehler beim Senden des Codes: ${response.body}');
@@ -21,7 +22,7 @@ Future<void> requestActivationCode(String identifier) async {
 Future<void> resetPasswordWithCode(
     String identifier, String code, String newPassword) async {
   final response = await http.post(
-    Uri.parse('https://purus-online.de/webservice/custom_reset_password.php'),
+    Uri.parse('$moodleUrl/webservice/custom_reset_password.php'),
     body: {
       'identifier': identifier,
       'code': code,
@@ -29,7 +30,7 @@ Future<void> resetPasswordWithCode(
     },
   );
 
-  if (response.statusCode == 200) {
+  if (response.statusCode >= 200 && response.statusCode < 300) {
     debugPrint('Passwort erfolgreich zurückgesetzt.');
   } else {
     debugPrint('Fehler beim Zurücksetzen des Passworts: ${response.body}');
@@ -39,9 +40,9 @@ Future<void> resetPasswordWithCode(
 Future<void> requestPasswordResetCode(String emailOrUsername) async {
   try {
     final response = await http.post(
-      Uri.parse('https://purus-online.de/webservice/rest/server.php'),
+      Uri.parse('$moodleUrl/webservice/rest/server.php'),
       body: {
-        'wstoken': authToken, // Webservice-Token
+        'wstoken': puruslernappToken, // Webservice-Token
         'wsfunction':
             'core_auth_request_password_reset', // Passwort-Zurücksetzungsfunktion
         'moodlewsrestformat': 'json', // Antwort im JSON-Format
@@ -50,7 +51,7 @@ Future<void> requestPasswordResetCode(String emailOrUsername) async {
     );
 
     // final response = await http.post(
-    //   Uri.parse("https://purus-online.de/webservice/rest/server.php"),
+    //   Uri.parse("$moodleUrl/webservice/rest/server.php"),
     //   body: {
     //     "emailOrUsername": emailOrUsername,
     //   },
