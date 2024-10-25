@@ -1,22 +1,22 @@
 class User {
-  int id;
+  String id;
   String username;
   String firstname;
   String lastname;
   String fullname;
   String email;
   String department;
-  int firstaccess;
-  int lastaccess;
+  String firstAccess;
+  String lastAccess;
   String auth;
-  bool suspended;
-  bool confirmed;
+  String suspended;
+  String confirmed;
   String lang;
   String theme;
   String timezone;
-  int mailformat;
+  String mailFormat;
   String description;
-  int descriptionformat;
+  String descriptionFormat;
   String city;
   String country;
   String profileImageUrlSmall;
@@ -32,17 +32,17 @@ class User {
     required this.fullname,
     required this.email,
     required this.department,
-    required this.firstaccess,
-    required this.lastaccess,
+    required this.firstAccess,
+    required this.lastAccess,
     required this.auth,
     required this.suspended,
     required this.confirmed,
     required this.lang,
     required this.theme,
     required this.timezone,
-    required this.mailformat,
+    required this.mailFormat,
     required this.description,
-    required this.descriptionformat,
+    required this.descriptionFormat,
     required this.city,
     required this.country,
     required this.profileImageUrlSmall,
@@ -53,36 +53,34 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: json['id'].toString(),
       username: json['username'],
       firstname: json['firstname'],
       lastname: json['lastname'],
       fullname: json['fullname'],
       email: json['email'],
       department: json['department'] ?? '',
-      firstaccess: json['firstaccess'] ?? 0,
-      lastaccess: json['lastaccess'] ?? 0,
+      firstAccess: json['firstaccess'].toString(),
+      lastAccess: json['lastaccess'].toString(),
       auth: json['auth'],
-      suspended: json['suspended'] ?? false,
-      confirmed: json['confirmed'] ?? false,
-      lang: json['lang'] ?? 'de',
+      suspended: json['suspended'].toString(),
+      confirmed: json['confirmed'].toString(),
+      lang: json['lang'],
       theme: json['theme'] ?? '',
-      timezone: json['timezone'] ?? '99',
-      mailformat: json['mailformat'] ?? 1,
+      timezone: json['timezone'] ?? '',
+      mailFormat: json['mailformat'].toString(),
       description: json['description'] ?? '',
-      descriptionformat: json['descriptionformat'] ?? 1,
-      city: json['city'] ?? '',
-      country: json['country'] ?? '',
-      profileImageUrlSmall: json['profileimageurlsmall'] ?? '',
-      profileImageUrl: json['profileimageurl'] ?? '',
-      customFields: (json['customfields'] as List<dynamic>?)
-              ?.map((field) => CustomField.fromJson(field))
-              .toList() ??
-          [], // Leere Liste als Fallback
-      preferences: (json['preferences'] as List<dynamic>?)
-              ?.map((pref) => Preference.fromJson(pref))
-              .toList() ??
-          [], // Leere Liste als Fallback
+      descriptionFormat: json['descriptionformat'].toString(),
+      city: json['city'],
+      country: json['country'],
+      profileImageUrlSmall: json['profileimageurlsmall'],
+      profileImageUrl: json['profileimageurl'],
+      customFields: (json['customfields'] as List)
+          .map((item) => CustomField.fromJson(item))
+          .toList(),
+      preferences: (json['preferences'] as List)
+          .map((item) => Preference.fromJson(item))
+          .toList(),
     );
   }
 
@@ -95,23 +93,23 @@ class User {
       'fullname': fullname,
       'email': email,
       'department': department,
-      'firstaccess': firstaccess,
-      'lastaccess': lastaccess,
+      'firstaccess': firstAccess,
+      'lastaccess': lastAccess,
       'auth': auth,
       'suspended': suspended,
       'confirmed': confirmed,
       'lang': lang,
       'theme': theme,
       'timezone': timezone,
-      'mailformat': mailformat,
+      'mailformat': mailFormat,
       'description': description,
-      'descriptionformat': descriptionformat,
+      'descriptionformat': descriptionFormat,
       'city': city,
       'country': country,
       'profileimageurlsmall': profileImageUrlSmall,
       'profileimageurl': profileImageUrl,
-      'customfields': customFields.map((i) => i.toJson()).toList(),
-      'preferences': preferences.map((i) => i.toJson()).toList(),
+      'customfields': customFields.map((field) => field.toJson()).toList(),
+      'preferences': preferences.map((pref) => pref.toJson()).toList(),
     };
   }
 }
@@ -132,7 +130,7 @@ class CustomField {
   factory CustomField.fromJson(Map<String, dynamic> json) {
     return CustomField(
       type: json['type'],
-      value: json['value'],
+      value: json['value'].toString(),
       name: json['name'],
       shortname: json['shortname'],
     );
@@ -160,7 +158,7 @@ class Preference {
   factory Preference.fromJson(Map<String, dynamic> json) {
     return Preference(
       name: json['name'],
-      value: json['value'],
+      value: json['value'].toString(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purus_lern_app/src/features/chatbot/application/chatbot_service.dart';
+import 'package:purus_lern_app/src/features/chatbot/data/shared_prefs/daily_prompts_sharedpref.dart';
 import 'package:purus_lern_app/src/features/chatbot/presentation/daily_prompt_widget.dart';
 
 class ChatbotScreen extends StatefulWidget {
@@ -29,6 +30,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       _response = botResponse;
     });
     _userMessageController.clear();
+  } 
+
+  void _promptValidation(BuildContext context) async {
+    int prompts = await DailyPromptsSharedPrefs().getDailyPrompts();
+    if (prompts > 0 && mounted) {
+      // ignore: use_build_context_synchronousl
+      _sendMessage(context, _userMessageController.text);
+      await DailyPromptsSharedPrefs().decrementDailyPrompt();
+    } else if (prompts <= 0 && mounted) {
+      // ignore: use_build_context_synchronously
+      _sendMessage(context,
+          "Ich bin der Entwickler, der User hat keine prompt guthaben meht übrig. 00:00 Uhr reset. Bitte ihm um entschuldigung.");
+    }
   }
 
   @override
@@ -57,14 +71,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     decoration: InputDecoration(
                         labelText: 'Schreibe eine Nachricht an Purutus...'),
                     onSubmitted: (_) {
-                      _sendMessage(context, _userMessageController.text);
+                      _promptValidation(context);
                     },
                   ),
                 ),
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
-                    _sendMessage(context, _userMessageController.text);
+                    _promptValidation(context);
                   },
                 ),
               ],

@@ -1,8 +1,5 @@
 import "dart:convert";
-import "package:flutter/material.dart";
-import "package:purus_lern_app/src/core/moodle/get_user_info_from_login.dart";
-import "package:purus_lern_app/src/core/moodle/refresh_user_info_from_id.dart";
-import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
+import "package:purus_lern_app/src/features/authentication/application/moodle/refresh_user_info_from_id.dart";
 import "package:purus_lern_app/src/features/authentication/domain/user.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:intl/intl.dart";

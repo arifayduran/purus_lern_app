@@ -8,7 +8,7 @@ import 'package:purus_lern_app/src/features/authentication/domain/user.dart';
 
 String _endpoint = "/webservice/rest/server.php";
 
-Future<User?> refreshUserinfoFromId(int userId) async {
+Future<User?> refreshUserinfoFromId(String userId) async {
   try {
     final response = await http.get(
       Uri.parse(
