@@ -75,12 +75,14 @@ class User {
       country: json['country'],
       profileImageUrlSmall: json['profileimageurlsmall'],
       profileImageUrl: json['profileimageurl'],
-      customFields: (json['customfields'] as List)
-          .map((item) => CustomField.fromJson(item))
-          .toList(),
-      preferences: (json['preferences'] as List)
-          .map((item) => Preference.fromJson(item))
-          .toList(),
+      customFields: (json['customfields'] as List<dynamic>?)
+              ?.map((item) => CustomField.fromJson(item))
+              .toList() ??
+          [],
+      preferences: (json['preferences'] as List<dynamic>?)
+              ?.map((item) => Preference.fromJson(item))
+              .toList() ??
+          [],
     );
   }
 

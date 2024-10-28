@@ -1,6 +1,8 @@
 import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
 
 List<String> chatbotMessages = [
+  'Ich weiss, "Purutus" klingt mytisch und alt, aber auch sehr weise! 👳🏼‍♂️😜🏛️',
+  "Ich habe mich gerade auch zum Pflegehelfer gebildet, und zwar in 0,000001 Sekunden. Du kannst mich gerne testen 🤓",
   "Bereit, heute etwas Neues zu lernen, ${currentUser!.firstname}? 🚀",
   "Braucht dein Gehirn ein bisschen Training, ${currentUser!.firstname}? Ich bin hier, um dir zu helfen! 💪📚",
   "Kaffee in der Hand, ${currentUser!.firstname}? Zeit für ein kleines Quiz! ☕🤓",
@@ -26,7 +28,7 @@ List<String> chatbotMessages = [
   "Glaube an dich selbst, ${currentUser!.firstname} – und wenn das nicht reicht, frage mich! 💡",
   "Ich bin wie ein Lehrbuch, ${currentUser!.firstname}, nur witziger und interaktiver. Frag mich was!",
   "Denk dran, ${currentUser!.firstname}: Es gibt keine dummen Fragen, nur neugierige Schüler. Also, leg los!",
-  "Hey ${currentUser!.firstname}, bereit, mehr über Pflege zu lernen? Ich bin Purutus und hier, um dir zu helfen! 🚑",
+  "Hey ${currentUser!.firstname}, bereit, mehr über Pflege zu lernen? Ich bin Purutus und ich bin hier, um dir zu helfen! 🚑",
   "Wusstest du, ${currentUser!.firstname}, dass gute Pflege nicht nur Wissen, sondern auch Empathie erfordert? Lass uns darüber sprechen! 💖",
   "Hast du Fragen zu Pflegepraktiken oder -techniken, ${currentUser!.firstname}? Frag einfach! Ich bin bereit! 📚",
   "Lass uns dein Wissen über Erste Hilfe erweitern, ${currentUser!.firstname}! Purutus hat die besten Tipps! 🩹",
@@ -48,9 +50,10 @@ List<String> chatbotMessages = [
   "Gemeinsam machen wir dich zum Pflegeprofi, ${currentUser!.firstname}! Lass uns loslegen! 🌈"
 ];
 
-
-void refreshChatbotMessages(){
- chatbotMessages = [
+void refreshChatbotMessages() {
+  chatbotMessages = [
+    'Ich weiss, "Purutus" klingt mytisch und alt, aber auch sehr weise! 👳🏼‍♂️😜',
+    "Ich habe mich gerade auch zum Pflegehelfer gebildet, und zwar in 0,000001 Sekunden. Du kannst mich gerne testen 🤓",
     "Bereit, heute etwas Neues zu lernen, ${currentUser!.firstname}? 🚀",
     "Braucht dein Gehirn ein bisschen Training, ${currentUser!.firstname}? Ich bin hier, um dir zu helfen! 💪📚",
     "Kaffee in der Hand, ${currentUser!.firstname}? Zeit für ein kleines Quiz! ☕🤓",
@@ -76,7 +79,7 @@ void refreshChatbotMessages(){
     "Glaube an dich selbst, ${currentUser!.firstname} – und wenn das nicht reicht, frage mich! 💡",
     "Ich bin wie ein Lehrbuch, ${currentUser!.firstname}, nur witziger und interaktiver. Frag mich was!",
     "Denk dran, ${currentUser!.firstname}: Es gibt keine dummen Fragen, nur neugierige Schüler. Also, leg los!",
-    "Hey ${currentUser!.firstname}, bereit, mehr über Pflege zu lernen? Ich bin Purutus und hier, um dir zu helfen! 🚑",
+    "Hey ${currentUser!.firstname}, bereit, mehr über Pflege zu lernen? Ich bin Purutus und ich bin hier, um dir zu helfen! 🚑",
     "Wusstest du, ${currentUser!.firstname}, dass gute Pflege nicht nur Wissen, sondern auch Empathie erfordert? Lass uns darüber sprechen! 💖",
     "Hast du Fragen zu Pflegepraktiken oder -techniken, ${currentUser!.firstname}? Frag einfach! Ich bin bereit! 📚",
     "Lass uns dein Wissen über Erste Hilfe erweitern, ${currentUser!.firstname}! Purutus hat die besten Tipps! 🩹",

@@ -1,12 +1,13 @@
 import "dart:convert";
-import "package:purus_lern_app/src/features/authentication/application/moodle/refresh_user_info_from_id.dart";
+import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
+import "package:purus_lern_app/src/features/authentication/data/shared_prefs/user_token_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/domain/user.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:intl/intl.dart";
 
 class StayLoggedInSharedpref {
   Future<void> setLoginStatus(
-      bool stayLoggedInSharedpref, User currentUser) async {
+      bool stayLoggedInSharedpref, User currentUser, String userToken) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (stayLoggedInSharedpref) {
@@ -15,10 +16,12 @@ class StayLoggedInSharedpref {
       String loginDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
       await prefs.setString("loginDate", loginDate);
       await prefs.setString("currentUser", jsonEncode(currentUser.toJson()));
+      setUserTokenSharedpref(userToken);
     } else {
       await prefs.setBool("isLoggedIn", false);
       await prefs.remove("loginDate");
       await prefs.remove("currentUser");
+      clearUserTokenSharedpref();
     }
   }
 
@@ -28,6 +31,7 @@ class StayLoggedInSharedpref {
     String? loginDate = prefs.getString("loginDate");
 
     if (isLoggedIn == null || !isLoggedIn || loginDate == null) {
+      await sharedLogout();
       return false;
     }
 
@@ -38,7 +42,8 @@ class StayLoggedInSharedpref {
       await sharedLogout();
       return false;
     }
-
+    
+    userToken = await getUserToken();
     return true;
   }
 
@@ -47,23 +52,6 @@ class StayLoggedInSharedpref {
     await prefs.remove("isLoggedIn");
     await prefs.remove("loginDate");
     await prefs.remove("currentUser");
+    clearUserTokenSharedpref();
   }
-}
-
-Future<User?> getAndRefreshCurrentUser() async {
-  final prefs = await SharedPreferences.getInstance();
-  String? currentUserJson = prefs.getString("currentUser");
-
-  if (currentUserJson != null) {
-    Map<String, dynamic> userMap = jsonDecode(currentUserJson);
-
-    User? user = await refreshUserinfoFromId(userMap["id"]);
-    await prefs.setString("currentUser", jsonEncode(user!.toJson()));
-
-    // debugPrint(
-    //     "Logged Userid: ${userMap["id"]}, Username: ${userMap["username"]}, firstname: ${userMap["firstname"]}, lastname: ${userMap["lastname"]}, Email: ${userMap["email"]}");
-
-    return user;
-  }
-  return null;
 }

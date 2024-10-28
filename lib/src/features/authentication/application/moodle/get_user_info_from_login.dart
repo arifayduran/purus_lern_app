@@ -48,7 +48,7 @@ Future<User?> getUserinfoFromLogin(String loginInput) async {
     }
     return null;
   } catch (e) {
-    debugPrint('Fehler beim Abrufen der Daten: ${e.toString()}');
+    debugPrint('Catch Error: ${e.toString()}');
     logErrors(e.toString());
     return null;
   }

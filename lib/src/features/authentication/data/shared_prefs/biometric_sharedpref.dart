@@ -1,7 +1,7 @@
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void updateBiometrics(bool value) async {
+Future<void> updateBiometrics(bool value) async {
   isBiometricConfigured = value;
   BiometricsSharedpref sharedPrefBiometrics = BiometricsSharedpref();
   await sharedPrefBiometrics.setBiometricsAvailability(value);

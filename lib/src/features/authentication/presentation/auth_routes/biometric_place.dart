@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:purus_lern_app/src/core/presentation/home_screen.dart';
 import 'package:purus_lern_app/src/features/authentication/application/local_auth/local_auth_service.dart';
-import 'package:purus_lern_app/src/features/authentication/data/local_auth_assets.dart';
+import 'package:purus_lern_app/src/config/local_auth_assets.dart';
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:purus_lern_app/src/widgets/my_snack_bar.dart';
 import 'package:purus_lern_app/src/widgets/my_text_button.dart';

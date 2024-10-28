@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:purus_lern_app/src/config/gradients.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_tried_skipping_splash.dart";
 import "package:purus_lern_app/src/core/presentation/rive_manager.dart";
+import "package:purus_lern_app/src/data/main_conditions.dart";
 import "package:purus_lern_app/src/features/authentication/data/login_conditions.dart";
 import "package:purus_lern_app/src/features/authentication/domain/onboarding_place_model.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/forgot_password_place.dart";
@@ -129,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         );
       } else {
-        if (isOnboardingNotComplete) {
+        if (isOnboardingNotComplete || isFirstUsage) {
           setState(() {
             placeRouteNotifier.value = "Onboarding";
           });

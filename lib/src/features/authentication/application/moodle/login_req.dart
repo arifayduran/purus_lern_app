@@ -1,11 +1,16 @@
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
+import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_errors.dart";
 import "dart:convert";
 import "package:purus_lern_app/src/core/moodle/moodle_config.dart";
+import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
+import "package:purus_lern_app/src/features/authentication/data/shared_prefs/user_token_sharedpref.dart";
+import "package:purus_lern_app/src/widgets/my_snack_bar.dart";
 
-const String _endpoint = "/login/token.php";
+const String _endpoint = "login/token.php";
 
-Future<void> loginReq(String username, String password) async {
+Future<String> loginReq(BuildContext context, bool isMounted, String username,
+    String password) async {
   try {
     final url = Uri.parse("$moodleUrl$_endpoint");
 
@@ -23,43 +28,40 @@ Future<void> loginReq(String username, String password) async {
 
       if (responseData.containsKey("token")) {
         final token = responseData["token"];
-        debugPrint("Login erfolgreich. Token: $token");
-
-        getUserInfo(token);
-        // Mit dem Token kannst du jetzt API-Anfragen an Moodle senden
-      } else {
         debugPrint(
-            "Login fehlgeschlagen: ${responseData["error"] ?? "Unbekannter Fehler"}");
+            "Login erfolgreich. Statuscode: ${response.statusCode}, Token: $token");
+        userToken = token;
+        return "valid";
+      } else {
+        logErrors(response.statusCode.toString() + response.body);
+        debugPrint(
+            "Login fehlgeschlagen. Statuscode: ${response.statusCode}, Fehler: ${responseData["error"] ?? "Unbekannter Fehler"}, ${response.body}");
+        return "invalid";
       }
     } else {
-      debugPrint("Fehler bei der Anfrage: ${response.statusCode}");
+      logErrors(response.statusCode.toString() + response.body);
+      debugPrint(
+          "Fehler bei der Anfrage. Statuscode: ${response.statusCode}, Fehler: ${response.body}");
+      if (isMounted) {
+        // ignore: use_build_context_synchronously
+        mySnackbar(context,
+            "Fehler bei der Anfrage. Statuscode: ${response.statusCode}, Fehler: ${response.body}");
+      }
+      return "error";
     }
   } catch (e) {
-    debugPrint("Fehler: ${e.toString()}");
+    logErrors(e.toString());
+    debugPrint("Catch Error: ${e.toString()}");
+    if (isMounted) {
+      // ignore: use_build_context_synchronously
+      mySnackbar(context, "Fehler bei der Verbindung zum Server.");
+    }
+    return "error";
   }
 }
 
-Future<void> getUserInfo(String token) async {
-  try {
-    final url = Uri.parse(
-        '$moodleUrl/webservice/rest/server.php?wsfunction=core_webservice_get_site_info&moodlewsrestformat=json');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      debugPrint('Statuscode: ${response.statusCode}');
-      debugPrint('User Info: ${response.body}');
-    } else {
-      debugPrint('Fehler bei der Anfrage: ${response.statusCode}');
-      debugPrint('Antwort: ${response.body}');
-    }
-  } catch (e) {
-    debugPrint("Fehler: ${e.toString()}");
-  }
+Future<void> moodleLogout() async {
+  // Hier das gespeicherte Token entfernen, z.B. aus SharedPreferences
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // await prefs.remove('moodle_token');
 }

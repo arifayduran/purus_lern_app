@@ -16,6 +16,7 @@ import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/onb
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
 import 'package:purus_lern_app/src/widgets/my_snack_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // app version yaz + splash auch??
 
@@ -61,18 +62,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
       if (authenticated) {
         if (mounted) {
-          setState(() {
-            updateBiometrics(true);
-          });
+          await updateBiometrics(true);
+          setState(() {});
           if (mounted) {
             mySnackbar(context,
                 "Biometrisches Anmeldeverfahren erfolgreich eingerichtet.");
           }
         }
       } else {
-        setState(() {
-          updateBiometrics(false);
-        });
+        await updateBiometrics(false);
+
+        setState(() {});
         await checkBiometricAvailability();
         if (!isBiometricAvailable.value) {
           setState(() {});
@@ -112,6 +112,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 Image.network(currentUser!.profileImageUrl),
+                ElevatedButton(
+                    onPressed: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setBool("isFirstUsage", true);
+                    },
+                    child: Text("Reset isFirstUsage")),
                 TextButton(
                   onPressed: () {
                     getAppInfo();
@@ -156,6 +163,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         "Refresh biometric state auto wie loginplace / App Neustarten hinweisen?")),
                 TextButton(
                     onPressed: () {
+                      _timer!.cancel();
                       logout(context);
                     },
                     child: const Text("Logout")),

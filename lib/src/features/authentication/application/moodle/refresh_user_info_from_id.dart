@@ -29,7 +29,7 @@ Future<User?> refreshUserinfoFromId(String userId) async {
         debugPrint(
             'Userid: ${user["id"]}, Username: ${user["username"]}, firstname: ${user["firstname"]}, lastname: ${user["lastname"]}, Email: ${user["email"]}');
 
-        return User.fromJson(user);
+        return User.fromJson(user, );
       } else {
         debugPrint('Statuscode: ${response.statusCode}');
         debugPrint('Antwort: ${response.body}');
@@ -44,7 +44,7 @@ Future<User?> refreshUserinfoFromId(String userId) async {
     }
     return null;
   } catch (e) {
-    debugPrint('Fehler beim Abrufen der Daten: ${e.toString()}');
+    debugPrint('Catch Error: Fehler beim Abrufen der Daten: ${e.toString()}');
     logErrors(e.toString());
     return null;
   }

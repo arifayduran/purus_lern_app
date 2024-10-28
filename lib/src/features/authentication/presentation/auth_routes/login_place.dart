@@ -12,7 +12,7 @@ import "package:purus_lern_app/src/features/authentication/application/moodle/ge
 import "package:purus_lern_app/src/core/presentation/home_screen.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/refresh_biometric_state.dart";
 import "package:purus_lern_app/src/features/authentication/application/moodle/login_req.dart";
-import "package:purus_lern_app/src/features/authentication/data/local_auth_assets.dart";
+import "package:purus_lern_app/src/config/local_auth_assets.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometric_dont_ask_me_again_sharedpred.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometric_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/check_biometric_availability.dart";
@@ -57,8 +57,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
 
   bool _stayLoggedBox = false;
 
+  String _loginResponse = "";
   bool _isUsernameValid = false;
-  bool _isPasswordCorrect = false;
+  bool _isPasswordValid = false;
 
   String _alertText = "Bitte melden Sie sich an.";
   Color _alertTextColor = Colors.white;
@@ -74,7 +75,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   bool _showSecondAnimation = false;
 
   final LocalAuthService _localAuthService = LocalAuthService();
-  bool _isAuthenticating = false;
+  bool _isBiometricProcessing = false;
   bool _isConfigBiometricDone = false;
   bool _dontAskMeAgain = false;
 
@@ -118,19 +119,28 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   //   return _obscureText ? SFIcons.sf_eye_fill : SFIcons.sf_eye_slash_fill;
   // }
 
-  void _validation() async {
-    loginReq(_usernameController.text, _passwordController.text);
+  void _validation(BuildContext context) async {
+    _loginResponse = await loginReq(
+        context, mounted, _usernameController.text, _passwordController.text);
 
-    if (_usernameController.text == "arifayduran") {
+    if (_loginResponse == "valid") {
       _isUsernameValid = true;
-      if (_passwordController.text == "Novum#125me") {
-        _isPasswordCorrect = true;
-      }
+      _isPasswordValid = true;
+    } else if (_loginResponse == "invalid") {
+      _isUsernameValid = false;
+      _isPasswordValid = false;
     }
+
+    // if (_usernameController.text == "...") {
+    //   _isUsernameValid = true;
+    //   if (_passwordController.text == "...") {
+    //     _isPasswordValid = true;
+    //   }
+    // }
 
     _alertTextAndTextfieldStrokeUpdate();
 
-    if (_isUsernameValid && _isPasswordCorrect) {
+    if (_isUsernameValid && _isPasswordValid && _loginResponse == "valid") {
       logLogin(_usernameController.text.contains("@") ? "email" : "username",
           _stayLoggedBox);
 
@@ -140,7 +150,8 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
 
       if (_stayLoggedBox) {
         isLoggedIn = true;
-        StayLoggedInSharedpref().setLoginStatus(_stayLoggedBox, currentUser!);
+        StayLoggedInSharedpref()
+            .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
       }
 
       if (isBiometricAvailable.value &&
@@ -149,7 +160,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
           !biometricAskedBeforeAndNo) {
         _askConfigBiometricAfterLogin();
       } else if (isBiometricAvailable.value && _isConfigBiometricDone) {
-        updateBiometrics(true);
+        await updateBiometrics(true);
         _routeToHomeScreen();
       } else {
         _routeToHomeScreen();
@@ -178,26 +189,50 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
       });
       logErrors(_alertText);
     } else {
-      if (!_isUsernameValid) {
+      if (!_isUsernameValid && !_isPasswordValid) {
         setState(() {
-          _alertText = "Benutzername oder E-Mail nicht gefunden.";
+          _alertText = "Ungültige Anmeldedaten.\nVersuchen Sie es noch einmal!";
           _alertTextColor = purusRed;
           _myTextfieldUsernameStrokeColor = purusRed;
-          _myTextfieldPassswordStrokeColor = purusGrey;
-        });
-        logErrors(_alertText);
-      } else if (_isUsernameValid && !_isPasswordCorrect) {
-        setState(() {
-          _alertText =
-              "Falsches Passwort. Probieren Sie es erneut, oder setzen Sie Ihr Passwort zurück.";
-          _alertTextColor = purusRed;
-          _myTextfieldUsernameStrokeColor = purusGrey;
           _myTextfieldPassswordStrokeColor = purusRed;
         });
         logErrors(_alertText);
-      } else if (_isUsernameValid && _isPasswordCorrect) {
+      } else if (_loginResponse == "error") {
+        setState(() {
+          _alertText = "Fehler!";
+          _alertTextColor = purusRed;
+          _myTextfieldUsernameStrokeColor = purusGrey;
+          _myTextfieldPassswordStrokeColor = purusGrey;
+        });
+        logErrors(_alertText);
+        // }
+        // if (!_isUsernameValid) {
+        //   setState(() {
+        //     _alertText = "Benutzername oder E-Mail nicht gefunden.";
+        //     _alertTextColor = purusRed;
+        //     _myTextfieldUsernameStrokeColor = purusRed;
+        //     _myTextfieldPassswordStrokeColor = purusGrey;
+        //   });
+        //   logErrors(_alertText);
+        // } else if (_isUsernameValid && !_isPasswordValid) {
+        //   setState(() {
+        //     _alertText =
+        //         "Falsches Passwort. Probieren Sie es erneut, oder setzen Sie Ihr Passwort zurück.";
+        //     _alertTextColor = purusRed;
+        //     _myTextfieldUsernameStrokeColor = purusGrey;
+        //     _myTextfieldPassswordStrokeColor = purusRed;
+        //   });
+        //   logErrors(_alertText);
+      } else if (_isUsernameValid && _isPasswordValid) {
         setState(() {
           _alertText = "Erfolgreich Angemeldet.";
+          _alertTextColor = Colors.white;
+          _myTextfieldUsernameStrokeColor = purusGrey;
+          _myTextfieldPassswordStrokeColor = purusGrey;
+        });
+      } else {
+        setState(() {
+          _alertText = "Bitte melden Sie sich an.";
           _alertTextColor = Colors.white;
           _myTextfieldUsernameStrokeColor = purusGrey;
           _myTextfieldPassswordStrokeColor = purusGrey;
@@ -208,11 +243,11 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
 
   void _askConfigBiometricAfterLogin() {
     setState(() {
-      _isAuthenticating = true;
+      _isBiometricProcessing = true;
     });
     showCupertinoDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext context1) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return CupertinoAlertDialog(
@@ -257,23 +292,30 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
               ),
               actions: [
                 CupertinoDialogAction(
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
-                      _isAuthenticating = false;
+                      _isBiometricProcessing = false;
                     });
-                    Navigator.pop(context);
-                    _routeToHomeScreen();
-                    updateBiometrics(false);
+
+                    await updateBiometrics(false);
 
                     if (_dontAskMeAgain) {
-                      BiometricDontAskMeAgainSharedpref()
+                      await BiometricDontAskMeAgainSharedpref()
                           .setDontAskAgainPreference(true);
                     }
 
                     if (mounted) {
-                      mySnackbar(context,
-                          "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
+                      // ignore: use_build_context_synchronously
+                      Navigator.pop(context1);
+              
+                      mySnackbar(
+                        // ignore: use_build_context_synchronously
+                        context,
+                        "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.",
+                      );
                     }
+
+                    _routeToHomeScreen();
                   },
                   child: const Text(
                     "Nein",
@@ -281,14 +323,16 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                   ),
                 ),
                 CupertinoDialogAction(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _checkBiometricsAfterLogin();
-
+                  onPressed: () async {
                     if (_dontAskMeAgain) {
-                      BiometricDontAskMeAgainSharedpref()
+                      await BiometricDontAskMeAgainSharedpref()
                           .setDontAskAgainPreference(true);
                     }
+                    if (mounted) {
+                      // ignore: use_build_context_synchronously
+                      Navigator.pop(context1);
+                    }
+                    await _checkBiometricsAfterLogin();
                   },
                   child: const Text(
                     "Ja",
@@ -306,22 +350,22 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   Future<void> _checkBiometricsAfterLogin() async {
     try {
       setState(() {
-        _isAuthenticating = true;
+        _isBiometricProcessing = true;
       });
       bool authenticated = await _localAuthService.authenticateUser();
       setState(() {
-        _isAuthenticating = false;
+        _isBiometricProcessing = false;
       });
       if (authenticated) {
+        await updateBiometrics(true);
         _routeToHomeScreen();
-        updateBiometrics(true);
         if (mounted) {
           mySnackbar(context,
               "Biometrisches Anmeldeverfahren erfolgreich eingerichtet.");
         }
       } else {
+        await updateBiometrics(false);
         _routeToHomeScreen();
-        updateBiometrics(false);
         await checkBiometricAvailability();
         if (!isBiometricAvailable.value) {
           setState(() {});
@@ -349,7 +393,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     BuildContext context,
   ) {
     setState(() {
-      _isAuthenticating = true;
+      _isBiometricProcessing = true;
     });
     showCupertinoDialog(
       context: context,
@@ -361,7 +405,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
             CupertinoDialogAction(
               onPressed: () {
                 setState(() {
-                  _isAuthenticating = false;
+                  _isBiometricProcessing = false;
                   _isConfigBiometricDone = false;
                 });
                 Navigator.pop(context);
@@ -394,13 +438,13 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   Future<void> _checkBiometricsToConfig() async {
     try {
       setState(() {
-        _isAuthenticating = true;
+        _isBiometricProcessing = true;
       });
 
       bool authenticated = await _localAuthService.authenticateUser();
 
       setState(() {
-        _isAuthenticating = false;
+        _isBiometricProcessing = false;
         _isConfigBiometricDone = authenticated;
       });
 
@@ -438,11 +482,11 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   Future<void> _checkBiometrics() async {
     try {
       setState(() {
-        _isAuthenticating = true;
+        _isBiometricProcessing = true;
       });
       bool authenticated = await _localAuthService.authenticateUser();
       setState(() {
-        _isAuthenticating = false;
+        _isBiometricProcessing = false;
       });
       if (authenticated) {
         _routeToHomeScreen();
@@ -611,7 +655,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                               textInputAction: TextInputAction.done,
                               // maxLength: 20,
                               onSubmitted: (p0) {
-                                _validation();
+                                _validation(context);
                                 // FocusManager.instance.primaryFocus?.unfocus();
                               },
                               // validator: (value) {
@@ -702,7 +746,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                               children: [
                                 MyButton(
                                   onTap: () {
-                                    _validation();
+                                    _validation(context);
                                     FocusManager.instance.primaryFocus
                                         ?.unfocus();
                                   },
@@ -856,7 +900,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            if (_isAuthenticating)
+            if (_isBiometricProcessing)
               Positioned(
                 top: 0,
                 child: BackdropFilter(
