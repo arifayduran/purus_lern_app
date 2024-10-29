@@ -5,7 +5,7 @@ import 'package:purus_lern_app/src/features/authentication/data/login_conditions
 Future<void> checkBiometricAvailability() async {
   isBiometricAvailable.value = await LocalAuthService().isBiometricAvailable();
   if (!isBiometricAvailable.value) {
-    isBiometricConfigured = false;
+    isBiometricsConfigured = false;
     BiometricsSharedpref().setBiometricsAvailability(false);
   }
 }

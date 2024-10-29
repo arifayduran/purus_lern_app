@@ -30,7 +30,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       _response = botResponse;
     });
     _userMessageController.clear();
-  } 
+  }
 
   void _promptValidation(BuildContext context) async {
     int prompts = await DailyPromptsSharedPrefs().getDailyPrompts();

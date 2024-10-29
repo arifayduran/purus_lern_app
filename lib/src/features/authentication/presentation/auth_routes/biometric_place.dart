@@ -136,6 +136,9 @@ class _BiometricPlaceState extends State<BiometricPlace>
                     widget.transitionToRoute("Login");
                   },
                 ),
+                SizedBox(
+                  height: 0,
+                ),
               ],
             ),
           ),

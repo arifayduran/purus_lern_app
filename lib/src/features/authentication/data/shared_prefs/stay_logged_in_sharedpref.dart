@@ -7,7 +7,7 @@ import "package:intl/intl.dart";
 
 class StayLoggedInSharedpref {
   Future<void> setLoginStatus(
-      bool stayLoggedInSharedpref, User currentUser, String userToken) async {
+      bool stayLoggedInSharedpref, User? currentUser, String? userToken) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (stayLoggedInSharedpref) {
@@ -15,8 +15,8 @@ class StayLoggedInSharedpref {
 
       String loginDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
       await prefs.setString("loginDate", loginDate);
-      await prefs.setString("currentUser", jsonEncode(currentUser.toJson()));
-      setUserTokenSharedpref(userToken);
+      await prefs.setString("currentUser", jsonEncode(currentUser!.toJson()));
+      setUserTokenSharedpref(userToken!);
     } else {
       await prefs.setBool("isLoggedIn", false);
       await prefs.remove("loginDate");
@@ -42,13 +42,16 @@ class StayLoggedInSharedpref {
       await sharedLogout();
       return false;
     }
-    
+
+    lastLoggedInAsDay = savedDate;
+    remainingLoggedInAsDays = 30 - currentDate.difference(savedDate).inDays;
     userToken = await getUserToken();
     return true;
   }
 
   Future<void> sharedLogout() async {
     final prefs = await SharedPreferences.getInstance();
+    // await prefs.setBool("isLoggedIn", false);
     await prefs.remove("isLoggedIn");
     await prefs.remove("loginDate");
     await prefs.remove("currentUser");

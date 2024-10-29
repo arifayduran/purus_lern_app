@@ -31,7 +31,7 @@ Future<void> initializeApp() async {
   currentUser = await getAndRefreshCurrentUserSharedpref();
   isOnboardingNotComplete =
       !await OnboardingStatusSharedpref().isOnboardingDone();
-  isBiometricConfigured =
+  isBiometricsConfigured =
       await BiometricsSharedpref().getBiometricsAvailability();
   biometricAskedBeforeAndNo =
       await BiometricDontAskMeAgainSharedpref().getDontAskAgainPreference();
@@ -42,15 +42,23 @@ Future<void> initializeApp() async {
       await LocalAuthService().getAvailableBiometricsInString();
 
   await getAppInfo();
-
-  debugPrint("isFirstUsage: $isFirstUsage");
+  debugPrint("-------------");
   debugPrint("isLoggedIn: $isLoggedIn");
+  debugPrint(
+      "currentUser: ${currentUser == null ? currentUser : "Userid: ${currentUser!.id}, Username: ${currentUser!.username}, firstname: ${currentUser!.firstname}, lastname: ${currentUser!.lastname}, Email: ${currentUser!.email}"}");
+  debugPrint("userToken: $userToken");
+  debugPrint("lastLoggedInAsDay: $lastLoggedInAsDay");
+  debugPrint("remainingLoggedInAsDays: $remainingLoggedInAsDays");
+
+  debugPrint("-------------");
+  debugPrint("isFirstUsage: $isFirstUsage");
   debugPrint("isOnboardingNotComplete: $isOnboardingNotComplete");
   debugPrint("biometricAskedBeforeAndNo: $biometricAskedBeforeAndNo");
-  debugPrint("isBiometricConfigured: $isBiometricConfigured");
+  debugPrint("isBiometricsConfigured: $isBiometricsConfigured");
   debugPrint("isBiometricAvailable: $isBiometricAvailable");
   debugPrint("isDeviceSupportedForBiometric: $isDeviceSupportedForBiometric");
   debugPrint("availableBiometricsString: $availableBiometricsString");
+  debugPrint("-------------");
 
   logAppStartEvent();
 }

@@ -102,7 +102,7 @@ class _OnboardingPlaceState extends State<OnboardingPlace> {
                         await OnboardingStatusSharedpref()
                             .setOnboardingStatusSharedpref(true);
                         await logOnboardingSkipped();
-                        if (isBiometricConfigured) {
+                        if (isBiometricsConfigured) {
                           widget.transitionToRoute("Biometric");
                         } else {
                           widget.transitionToRoute('Login');
@@ -118,7 +118,7 @@ class _OnboardingPlaceState extends State<OnboardingPlace> {
                         await OnboardingStatusSharedpref()
                             .setOnboardingStatusSharedpref(true);
                         await logOnboardingDone();
-                        if (isBiometricConfigured) {
+                        if (isBiometricsConfigured) {
                           widget.transitionToRoute("Biometric");
                         } else {
                           widget.transitionToRoute('Login');

@@ -117,26 +117,28 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (mounted) {
       if (isLoggedIn) {
-        _routeAnimationController.forward();
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: const HomeScreen(),
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 1200),
-          ),
-        );
+        if (isBiometricAvailable.value && isBiometricsConfigured) {
+          setState(() {
+            placeRouteNotifier.value = "Biometric";
+          });
+        } else {
+          _routeAnimationController.forward();
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: const HomeScreen(),
+                );
+              },
+              transitionDuration: const Duration(milliseconds: 1200),
+            ),
+          );
+        }
       } else {
         if (isOnboardingNotComplete || isFirstUsage) {
           setState(() {
             placeRouteNotifier.value = "Onboarding";
-          });
-        } else if (isBiometricAvailable.value && isBiometricConfigured) {
-          setState(() {
-            placeRouteNotifier.value = "Biometric";
           });
         } else {
           setState(() {

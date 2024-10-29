@@ -24,16 +24,9 @@ import "package:purus_lern_app/src/widgets/my_animated_checkmark.dart";
 import "package:purus_lern_app/src/widgets/my_button.dart";
 import "package:purus_lern_app/src/widgets/my_rotating_svg.dart";
 import "package:purus_lern_app/src/widgets/my_snack_bar.dart";
+import "package:purus_lern_app/src/widgets/my_text_button.dart";
 import "package:purus_lern_app/src/widgets/my_textfield.dart";
 // import "package:scaled_app/scaled_app.dart";
-
-// angemeldet bleiben händeln
-// direkt faceid alowment ayarla? apple? (beschreiben yap?)
-// platformbedingt
-// Bio ikiye böl: bir system compatible(testen et biriyle?) + erlaubt
-// faceid ve angemeldet bleiben olursa firebase auth kalici olsun: anmeldedaten in sharedpref fln!
-// facid nutzen yapinca angemeldet bleiben olmasin?/faceid sadece angemeldet bleiben yerine gecsin???
-// log ekle + handgi platofrm ve facid fln?
 
 class LoginPlace extends StatefulWidget {
   const LoginPlace({super.key, required this.transitionToRoute});
@@ -84,6 +77,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
     _updateAvailableBioStringTimer =
         Timer.periodic(Duration(seconds: 3), (Timer timer) {
       _refreshBiometricState();
@@ -120,8 +114,11 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   // }
 
   void _validation(BuildContext context) async {
-    _loginResponse = await loginReq(
-        context, mounted, _usernameController.text, _passwordController.text);
+    if (_usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      _loginResponse = await loginReq(
+          context, mounted, _usernameController.text, _passwordController.text);
+    }
 
     if (_loginResponse == "valid") {
       _isUsernameValid = true;
@@ -152,13 +149,17 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
         isLoggedIn = true;
         StayLoggedInSharedpref()
             .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
+      } else {
+        isLoggedIn = false;
+        StayLoggedInSharedpref().setLoginStatus(_stayLoggedBox, null, null);
       }
 
       if (isBiometricAvailable.value &&
-          !isBiometricConfigured &&
+          !isBiometricsConfigured &&
           !_isConfigBiometricDone &&
           !biometricAskedBeforeAndNo) {
-        _askConfigBiometricAfterLogin();
+        // ignore: use_build_context_synchronously
+        _askConfigBiometricAfterLogin(context);
       } else if (isBiometricAvailable.value && _isConfigBiometricDone) {
         await updateBiometrics(true);
         _routeToHomeScreen();
@@ -241,7 +242,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     }
   }
 
-  void _askConfigBiometricAfterLogin() {
+  void _askConfigBiometricAfterLogin(
+    BuildContext context,
+  ) {
     setState(() {
       _isBiometricProcessing = true;
     });
@@ -249,7 +252,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
       context: context,
       builder: (BuildContext context1) {
         return StatefulBuilder(
-          builder: (context, setDialogState) {
+          builder: (context2, setDialogState) {
             return CupertinoAlertDialog(
               title: const Text("Erfolgreich Angemeldet"),
               content: Column(
@@ -307,7 +310,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                     if (mounted) {
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context1);
-              
+
                       mySnackbar(
                         // ignore: use_build_context_synchronously
                         context,
@@ -397,7 +400,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     });
     showCupertinoDialog(
       context: context,
-      builder: (context) {
+      builder: (context1) {
         return CupertinoAlertDialog(
           content: const Text(
               "Möchten Sie biometrisches Anmeldeverfahren einrichten?"),
@@ -408,11 +411,10 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                   _isBiometricProcessing = false;
                   _isConfigBiometricDone = false;
                 });
-                Navigator.pop(context);
-                if (mounted) {
-                  mySnackbar(context,
-                      "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
-                }
+                Navigator.pop(context1);
+
+                mySnackbar(context,
+                    "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
               },
               child: const Text(
                 "Nein",
@@ -421,7 +423,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
             ),
             CupertinoDialogAction(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context1);
                 _checkBiometricsToConfig();
               },
               child: const Text(
@@ -669,72 +671,90 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                           // SizedBox(
                           //   height: _columnSpacing,
                           // ),
-                          Row(
-                            children: [
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  setState(() {
-                                    _stayLoggedBox = !_stayLoggedBox;
-                                  });
-                                },
-                                child: SizedBox(
-                                  height: 19 + _columnSpacing * 2,
-                                  child: Row(
-                                    children: [
-                                      const SizedBox(
-                                        width: 7,
-                                      ),
-                                      _stayLoggedBox
-                                          ? const SFIcon(
-                                              SFIcons.sf_checkmark_square_fill,
+                          SizedBox(
+                            height: 19 + _columnSpacing * 2,
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() {
+                                      _stayLoggedBox = !_stayLoggedBox;
+                                    });
+                                  },
+                                  child: SizedBox(
+                                    height: 19 + _columnSpacing * 2,
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 7,
+                                        ),
+                                        _stayLoggedBox
+                                            ? const SFIcon(
+                                                SFIcons
+                                                    .sf_checkmark_square_fill,
+                                                color: Colors.white,
+                                                fontSize: 19,
+                                              )
+                                            : const SFIcon(
+                                                SFIcons.sf_square,
+                                                color: Colors.white,
+                                                fontSize: 19,
+                                              ),
+                                        const SizedBox(
+                                          width: 7,
+                                        ),
+                                        const Text(
+                                          "Angemeldet bleiben",
+                                          style: TextStyle(
                                               color: Colors.white,
-                                              fontSize: 19,
-                                            )
-                                          : const SFIcon(
-                                              SFIcons.sf_square,
-                                              color: Colors.white,
-                                              fontSize: 19,
-                                            ),
-                                      const SizedBox(
-                                        width: 7,
-                                      ),
-                                      const Text(
-                                        "Angemeldet bleiben",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const Expanded(child: SizedBox()),
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  setState(() {
-                                    widget.transitionToRoute("ForgotPassword");
-                                  });
-                                },
-                                child: SizedBox(
-                                  height: 19 + _columnSpacing * 2,
-                                  child: Center(
-                                    child: const Text(
-                                      "Passwort vergessen?",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700),
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 7,
-                              ),
-                            ],
+                                const Expanded(child: SizedBox()),
+                                SizedBox(
+                                  height: 32,
+                                  child: MyTextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.transitionToRoute(
+                                            "ForgotPassword");
+                                      });
+                                    },
+                                    text: "Passwort vergessen?",
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                // GestureDetector(
+                                //   behavior: HitTestBehavior.opaque,
+                                //   onTap: () {
+                                //     setState(() {
+                                //       widget.transitionToRoute("ForgotPassword");
+                                //     });
+                                //   },
+                                //   child: SizedBox(
+                                //     height: 19 + _columnSpacing * 2,
+                                //     child: Center(
+                                //       child: const Text(
+                                //         "Passwort vergessen?",
+                                //         style: TextStyle(
+                                //             color: Colors.white,
+                                //             fontSize: 10,
+                                //             fontWeight: FontWeight.w700),
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                              ],
+                            ),
                           ),
                           // SizedBox(
                           //   height: _columnSpacing,
@@ -806,7 +826,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                       return GestureDetector(
                                         behavior: HitTestBehavior.opaque,
                                         onTap: () {
-                                          if (isBiometricConfigured) {
+                                          if (isBiometricsConfigured) {
                                             _checkBiometrics();
                                           } else {
                                             _askConfigBiometric(context);
@@ -865,7 +885,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                                   child: Text(
                                                     availableBiometricsString !=
                                                             "Biometrics sind nicht aktiv"
-                                                        ? "${isBiometricConfigured ? "Mit " : ""}$availableBiometricsString ${isBiometricConfigured ? "Anmelden" : _isConfigBiometricDone ? "ist eingerichtet" : "einrichten"}"
+                                                        ? "${isBiometricsConfigured ? "Mit " : ""}$availableBiometricsString ${isBiometricsConfigured ? "Anmelden" : _isConfigBiometricDone ? "ist eingerichtet" : "einrichten"}"
                                                         : "Biometrics sind nicht aktiv",
                                                     style: TextStyle(
                                                       color: Colors.white,

@@ -190,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     valueListenable: isBiometricAvailable,
                     builder: (context, value, child) {
                       if (value) {
-                        if (isBiometricConfigured) {
+                        if (isBiometricsConfigured) {
                           return TextButton(
                               onPressed: () async {
                                 setState(() {
@@ -225,7 +225,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                               onPressed: () async {
                                                 Navigator.pop(context);
                                                 setState(() {
-                                                  isBiometricConfigured = false;
+                                                  isBiometricsConfigured =
+                                                      false;
                                                   _isAuthenticating = false;
                                                 });
                                                 await BiometricsSharedpref()
