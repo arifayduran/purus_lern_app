@@ -48,7 +48,9 @@ class ChatbotService {
       }
     } catch (e) {
       logErrors(e.toString());
+      debugPrint("-------------");
       debugPrint("Catch Error: ${e.toString()}");
+      debugPrint("-------------");
       // if (isMounted) {
       //   // ignore: use_build_context_synchronously
       //   mySnackbar(context, "Fehler bei der Verbindung zum Server: ${e.toString()}");

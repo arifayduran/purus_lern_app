@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Route bedingt
-bool isLoggedIn = false;
+bool isAutoLoggedIn = false;
 bool isOnboardingNotComplete = true;
 bool isBiometricsConfigured = false;
 

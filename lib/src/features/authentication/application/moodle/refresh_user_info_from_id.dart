@@ -24,27 +24,33 @@ Future<User?> refreshUserinfoFromId(String userId) async {
           data['users'] != null &&
           data['users'].isNotEmpty) {
         final user = data['users'][0];
-
         // debugPrint('Statuscode: ${response.statusCode}');
         debugPrint(
-            'Userid: ${user["id"]}, Username: ${user["username"]}, firstname: ${user["firstname"]}, lastname: ${user["lastname"]}, Email: ${user["email"]}');
-
-        return User.fromJson(user, );
+            '------------- Refreshed Userid: ${user["id"]}, Username: ${user["username"]}, firstname: ${user["firstname"]}, lastname: ${user["lastname"]}, Email: ${user["email"]}');
+        return User.fromJson(
+          user,
+        );
       } else {
+        debugPrint("-------------");
         debugPrint('Statuscode: ${response.statusCode}');
         debugPrint('Antwort: ${response.body}');
         debugPrint('Nutzer nicht gefunden.');
+        debugPrint("-------------");
         logErrors(response.statusCode.toString() + response.body);
         return null;
       }
     } else {
+      debugPrint("-------------");
       debugPrint('Fehler beim Abrufen der Daten: ${response.statusCode}');
       debugPrint('Antwort: ${response.body}');
+      debugPrint("-------------");
       logErrors(response.statusCode.toString() + response.body);
     }
     return null;
   } catch (e) {
+    debugPrint("-------------");
     debugPrint('Catch Error: Fehler beim Abrufen der Daten: ${e.toString()}');
+    debugPrint("-------------");
     logErrors(e.toString());
     return null;
   }

@@ -20,7 +20,9 @@ class LocalAuthService {
         return await _auth.canCheckBiometrics &&
             await _auth.isDeviceSupported();
       } catch (e) {
+        debugPrint("-------------");
         debugPrint(e.toString());
+        debugPrint("-------------");
         return false;
       }
     } else {
@@ -72,7 +74,9 @@ class LocalAuthService {
 
         return "Biometrics sind nicht aktiv";
       } on PlatformException catch (e) {
+        debugPrint("-------------");
         debugPrint("Error: $e");
+        debugPrint("-------------");
         return "Biometrics sind nicht aktiv";
       }
     } else {
@@ -92,7 +96,9 @@ class LocalAuthService {
       );
       return isAuthenticated;
     } catch (e) {
+      debugPrint("-------------");
       debugPrint("Error during authentication: $e");
+      debugPrint("-------------");
       return false;
     }
   }

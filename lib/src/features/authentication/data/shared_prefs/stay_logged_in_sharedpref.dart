@@ -11,15 +11,18 @@ class StayLoggedInSharedpref {
     final prefs = await SharedPreferences.getInstance();
 
     if (stayLoggedInSharedpref) {
-      await prefs.setBool("isLoggedIn", true);
+      await prefs.setBool("isAutoLoggedIn", true);
 
-      String loginDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-      await prefs.setString("loginDate", loginDate);
+      // ignore: no_leading_underscores_for_local_identifiers
+      String _configuredAutoLoginDate =
+          DateFormat("yyyy-MM-dd").format(DateTime.now());
+      await prefs.setString(
+          "configuredAutoLoginDate", _configuredAutoLoginDate);
       await prefs.setString("currentUser", jsonEncode(currentUser!.toJson()));
       setUserTokenSharedpref(userToken!);
     } else {
-      await prefs.setBool("isLoggedIn", false);
-      await prefs.remove("loginDate");
+      await prefs.setBool("isAutoLoggedIn", false);
+      await prefs.remove("configuredAutoLoginDate");
       await prefs.remove("currentUser");
       clearUserTokenSharedpref();
     }
@@ -27,15 +30,20 @@ class StayLoggedInSharedpref {
 
   Future<bool> checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    bool? isLoggedIn = prefs.getBool("isLoggedIn");
-    String? loginDate = prefs.getString("loginDate");
+    bool? isAutoLoggedIn = prefs.getBool("isAutoLoggedIn");
+    // ignore: no_leading_underscores_for_local_identifiers
+    String? _configuredAutoLoginDate =
+        prefs.getString("configuredAutoLoginDate");
 
-    if (isLoggedIn == null || !isLoggedIn || loginDate == null) {
+    if (isAutoLoggedIn == null ||
+        !isAutoLoggedIn ||
+        _configuredAutoLoginDate == null) {
       await sharedLogout();
       return false;
     }
 
-    DateTime savedDate = DateFormat("yyyy-MM-dd").parse(loginDate);
+    DateTime savedDate =
+        DateFormat("yyyy-MM-dd").parse(_configuredAutoLoginDate);
     DateTime currentDate = DateTime.now();
 
     if (currentDate.difference(savedDate).inDays > 30) {
@@ -43,17 +51,17 @@ class StayLoggedInSharedpref {
       return false;
     }
 
-    lastLoggedInAsDay = savedDate;
-    remainingLoggedInAsDays = 30 - currentDate.difference(savedDate).inDays;
+    configuredAutoLoginDate = savedDate;
+    remainingAutoLoggedInAsDays = 30 - currentDate.difference(savedDate).inDays;
     userToken = await getUserToken();
     return true;
   }
 
   Future<void> sharedLogout() async {
     final prefs = await SharedPreferences.getInstance();
-    // await prefs.setBool("isLoggedIn", false);
-    await prefs.remove("isLoggedIn");
-    await prefs.remove("loginDate");
+    // await prefs.setBool("isAutoLoggedIn", false);
+    await prefs.remove("isAutoLoggedIn");
+    await prefs.remove("configuredAutoLoginDate");
     await prefs.remove("currentUser");
     clearUserTokenSharedpref();
   }

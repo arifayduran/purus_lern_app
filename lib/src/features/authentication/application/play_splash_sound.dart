@@ -14,8 +14,11 @@ Future<void> playSplashSound() async {
     await Future.delayed(Duration(seconds: 10));
     audioPlayer.dispose();
     debugPrint("Audio player disposed after 10 seconds.");
+    debugPrint("-------------");
   } catch (e) {
+    debugPrint("-------------");
     debugPrint("Error playing sound: $e");
     logAny("splash_sound", "Error playing sound: $e");
+    debugPrint("-------------");
   }
 }

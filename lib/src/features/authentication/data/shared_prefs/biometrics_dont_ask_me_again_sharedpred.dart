@@ -1,7 +1,7 @@
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class BiometricDontAskMeAgainSharedpref {
+class BiometricsDontAskMeAgainSharedpref {
   Future<void> setDontAskAgainPreference(bool value) async {
     biometricAskedBeforeAndNo = value;
     final prefs = await SharedPreferences.getInstance();

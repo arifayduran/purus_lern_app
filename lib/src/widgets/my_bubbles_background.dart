@@ -1,16 +1,15 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:purus_lern_app/src/config/palette.dart';
+// import 'package:purus_lern_app/src/config/palette.dart';
 
-class SplashBubblesBackground extends StatefulWidget {
-  const SplashBubblesBackground({super.key});
+class MyBubblesBackground extends StatefulWidget {
+  const MyBubblesBackground({super.key});
 
   @override
-  State<SplashBubblesBackground> createState() =>
-      _SplashBubblesBackgroundState();
+  State<MyBubblesBackground> createState() => _MyBubblesBackgroundState();
 }
 
-class _SplashBubblesBackgroundState extends State<SplashBubblesBackground>
+class _MyBubblesBackgroundState extends State<MyBubblesBackground>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late List<Bubble> _bubbles;
@@ -22,7 +21,7 @@ class _SplashBubblesBackgroundState extends State<SplashBubblesBackground>
       vsync: this,
       duration: const Duration(seconds: 30),
     )..repeat(reverse: true);
-    _bubbles = List.generate(10, (index) => Bubble(index));
+    _bubbles = List.generate(8, (index) => Bubble(index));
   }
 
   @override
@@ -63,7 +62,7 @@ class Bubble {
   void _initializeBubble() {
     x = _random.nextDouble();
     y = _random.nextDouble();
-    radius = 40.0 + _random.nextDouble() * 80.0;
+    radius = 20.0 + _random.nextDouble() * 60.0;
     speedX = (0.5 - _random.nextDouble()) * 0.001;
     speedY = (0.5 - _random.nextDouble()) * 0.001;
     opacity = 0.0;
@@ -107,8 +106,9 @@ class BubblesPainter extends CustomPainter {
     for (var bubble in bubbles) {
       bubble.update(animationValue);
       final paint = Paint()
-        ..color = purusGreen.withOpacity(bubble.opacity)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 50.0);
+        ..color =
+            const Color.fromARGB(255, 19, 164, 118).withOpacity(bubble.opacity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40.0);
       final x = bubble.x * size.width;
       final y = bubble.y * size.height;
       canvas.drawCircle(Offset(x, y), bubble.radius, paint);

@@ -12,10 +12,14 @@ Future<void> requestActivationCode(String identifier) async {
   );
 
   if (response.statusCode >= 200 && response.statusCode < 300) {
+      debugPrint("-------------");
     debugPrint('Aktivierungscode erfolgreich gesendet.');
+      debugPrint("-------------");
   } else {
+      debugPrint("-------------");
     debugPrint('Fehler beim Senden des Codes: ${response.body}');
     debugPrint("Fehler beim Senden des Codes  ${response.statusCode}");
+      debugPrint("-------------");
   }
 }
 
@@ -31,9 +35,13 @@ Future<void> resetPasswordWithCode(
   );
 
   if (response.statusCode >= 200 && response.statusCode < 300) {
+      debugPrint("-------------");
     debugPrint('Passwort erfolgreich zurückgesetzt.');
+      debugPrint("-------------");
   } else {
+      debugPrint("-------------");
     debugPrint('Fehler beim Zurücksetzen des Passworts: ${response.body}');
+      debugPrint("-------------");
   }
 }
 
@@ -58,13 +66,19 @@ Future<void> requestPasswordResetCode(String emailOrUsername) async {
     // );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint("-------------");
       debugPrint("Bestätigungscode gesendet ${response.statusCode}");
       debugPrint('Server Antwort: ${response.body}');
+        debugPrint("-------------");
     } else {
+        debugPrint("-------------");
       debugPrint("Fehler beim Senden des Codes  ${response.statusCode}");
       debugPrint('Server Antwort: ${response.body}');
+        debugPrint("-------------");
     }
   } catch (e) {
+      debugPrint("-------------");
     debugPrint('Exception: $e');
+      debugPrint("-------------");
   }
 }

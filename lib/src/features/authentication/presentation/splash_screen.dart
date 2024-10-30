@@ -9,7 +9,7 @@ import "package:purus_lern_app/src/features/authentication/presentation/auth_rou
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/registration_confirm_place.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/registration_place.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/reset_password_place.dart";
-import "package:purus_lern_app/src/features/authentication/presentation/splash_bubbles_background.dart";
+import "package:purus_lern_app/src/widgets/my_bubbles_background.dart";
 import "package:purus_lern_app/src/widgets/my_animated_bottom_bar_widget.dart";
 import "package:rive/rive.dart";
 import "package:purus_lern_app/src/core/presentation/home_screen.dart";
@@ -19,6 +19,8 @@ import "package:purus_lern_app/src/features/authentication/presentation/auth_rou
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -116,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 4500));
 
     if (mounted) {
-      if (isLoggedIn) {
+      if (isAutoLoggedIn) {
         if (isBiometricAvailable.value && isBiometricsConfigured) {
           setState(() {
             placeRouteNotifier.value = "Biometric";
@@ -177,7 +179,13 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: MyBackgroundGradient().myBackgroundGradient(),
         child: Stack(
           children: [
-            const SplashBubblesBackground(),
+            Positioned(
+              top: 0,
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  width: MediaQuery.of(context).size.width,
+                  child: const MyBubblesBackground()),
+            ),
             Scaffold(
               // resizeToAvoidBottomInset: false,
               backgroundColor: Colors.transparent,

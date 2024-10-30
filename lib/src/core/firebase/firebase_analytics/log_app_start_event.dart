@@ -13,7 +13,7 @@ Future<void> logAppStartEvent() async {
         "buildNumber": buildNumber,
         "buildSignature": buildSignature,
         "installerStore": installerStore,
-        "isLoggedIn": isLoggedIn.toString(),
+        "isAutoLoggedIn": isAutoLoggedIn.toString(),
         "isOnboardingNotComplete": isOnboardingNotComplete.toString(),
         "isBiometricsConfigured": isBiometricsConfigured.toString(),
         "biometricAskedBeforeAndNo": biometricAskedBeforeAndNo.toString(),

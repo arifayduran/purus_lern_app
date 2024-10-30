@@ -34,11 +34,11 @@ class _MyProgressCircleState extends State<MyProgressCircle>
     });
   }
 
-  // @override
-  // void dispose() {
-  //   _circleAnimationController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _circleAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

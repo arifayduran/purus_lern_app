@@ -6,6 +6,7 @@ import "package:flutter/services.dart";
 import "package:flutter_sficon/flutter_sficon.dart";
 import "package:flutter_svg/svg.dart";
 import "package:purus_lern_app/src/config/palette.dart";
+import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_any.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_errors.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_login.dart";
 import "package:purus_lern_app/src/features/authentication/application/moodle/get_user_info_from_login.dart";
@@ -13,8 +14,8 @@ import "package:purus_lern_app/src/core/presentation/home_screen.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/refresh_biometric_state.dart";
 import "package:purus_lern_app/src/features/authentication/application/moodle/login_req.dart";
 import "package:purus_lern_app/src/config/local_auth_assets.dart";
-import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometric_dont_ask_me_again_sharedpred.dart";
-import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometric_sharedpref.dart";
+import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_dont_ask_me_again_sharedpred.dart";
+import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/check_biometric_availability.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/local_auth_service.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_prefs/stay_logged_in_sharedpref.dart";
@@ -22,6 +23,7 @@ import "package:purus_lern_app/src/features/authentication/data/login_conditions
 import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
 import "package:purus_lern_app/src/widgets/my_animated_checkmark.dart";
 import "package:purus_lern_app/src/widgets/my_button.dart";
+import "package:purus_lern_app/src/widgets/my_cupertino_dialog.dart";
 import "package:purus_lern_app/src/widgets/my_rotating_svg.dart";
 import "package:purus_lern_app/src/widgets/my_snack_bar.dart";
 import "package:purus_lern_app/src/widgets/my_text_button.dart";
@@ -146,11 +148,13 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
       currentUser = await getUserinfoFromLogin(_usernameController.text);
 
       if (_stayLoggedBox) {
-        isLoggedIn = true;
+        logAny("isAutoLoggedIn", "true");
+        isAutoLoggedIn = true;
         StayLoggedInSharedpref()
             .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
       } else {
-        isLoggedIn = false;
+        logAny("isAutoLoggedIn", "false");
+        isAutoLoggedIn = false;
         StayLoggedInSharedpref().setLoginStatus(_stayLoggedBox, null, null);
       }
 
@@ -248,6 +252,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     setState(() {
       _isBiometricProcessing = true;
     });
+
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context1) {
@@ -303,7 +308,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                     await updateBiometrics(false);
 
                     if (_dontAskMeAgain) {
-                      await BiometricDontAskMeAgainSharedpref()
+                      await BiometricsDontAskMeAgainSharedpref()
                           .setDontAskAgainPreference(true);
                     }
 
@@ -328,7 +333,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                 CupertinoDialogAction(
                   onPressed: () async {
                     if (_dontAskMeAgain) {
-                      await BiometricDontAskMeAgainSharedpref()
+                      await BiometricsDontAskMeAgainSharedpref()
                           .setDontAskAgainPreference(true);
                     }
                     if (mounted) {
@@ -384,7 +389,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
         }
       }
     } catch (e) {
+      debugPrint("-------------");
       debugPrint(e.toString());
+      debugPrint("-------------");
       if (mounted) {
         mySnackbar(context,
             "Fehler bei der Einrichtung. Sie können es jederzeit in den Einstellungen einrichten.");
@@ -398,43 +405,23 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     setState(() {
       _isBiometricProcessing = true;
     });
-    showCupertinoDialog(
-      context: context,
-      builder: (context1) {
-        return CupertinoAlertDialog(
-          content: const Text(
-              "Möchten Sie biometrisches Anmeldeverfahren einrichten?"),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () {
-                setState(() {
-                  _isBiometricProcessing = false;
-                  _isConfigBiometricDone = false;
-                });
-                Navigator.pop(context1);
-
-                mySnackbar(context,
-                    "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
-              },
-              child: const Text(
-                "Nein",
-                style: TextStyle(color: CupertinoColors.destructiveRed),
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.pop(context1);
-                _checkBiometricsToConfig();
-              },
-              child: const Text(
-                "Ja",
-                style: TextStyle(color: CupertinoColors.activeBlue),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    myCupertinoDialog(
+        context,
+        null,
+        "Möchten Sie biometrisches Anmeldeverfahren einrichten?",
+        null,
+        null,
+        "Nein",
+        "Ja", () {
+      setState(() {
+        _isBiometricProcessing = false;
+        _isConfigBiometricDone = false;
+      });
+      mySnackbar(context,
+          "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
+    }, () {
+      _checkBiometricsToConfig();
+    });
   }
 
   Future<void> _checkBiometricsToConfig() async {
@@ -473,7 +460,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
         }
       }
     } catch (e) {
+      debugPrint("-------------");
       debugPrint(e.toString());
+      debugPrint("-------------");
       if (mounted) {
         mySnackbar(context,
             "Fehler bei der Einrichtung. Sie können es jederzeit in den Einstellungen einrichten.");
@@ -498,7 +487,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
         }
       }
     } catch (e) {
+      debugPrint("-------------");
       debugPrint(e.toString());
+      debugPrint("-------------");
       if (mounted) {
         mySnackbar(context, "Fehler beim biometrischen Anmeldeverfahren.");
       }
