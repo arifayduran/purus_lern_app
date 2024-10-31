@@ -1,5 +1,7 @@
 import "dart:convert";
+import "package:purus_lern_app/src/config/const_stay_logged_in_days.dart";
 import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
+import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_prefs/user_token_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/domain/user.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -25,6 +27,7 @@ class StayLoggedInSharedpref {
       await prefs.remove("configuredAutoLoginDate");
       await prefs.remove("currentUser");
       clearUserTokenSharedpref();
+      updateBiometrics(false);
     }
   }
 
@@ -46,14 +49,16 @@ class StayLoggedInSharedpref {
         DateFormat("yyyy-MM-dd").parse(_configuredAutoLoginDate);
     DateTime currentDate = DateTime.now();
 
-    if (currentDate.difference(savedDate).inDays > 30) {
+    if (currentDate.difference(savedDate).inDays > constStayLoggedInDays) {
       await sharedLogout();
       return false;
     }
 
     configuredAutoLoginDate = savedDate;
-    remainingAutoLoggedInAsDays = 30 - currentDate.difference(savedDate).inDays;
+    remainingAutoLoggedInAsDays =
+        constStayLoggedInDays - currentDate.difference(savedDate).inDays;
     userToken = await getUserToken();
+
     return true;
   }
 
@@ -64,5 +69,6 @@ class StayLoggedInSharedpref {
     await prefs.remove("configuredAutoLoginDate");
     await prefs.remove("currentUser");
     clearUserTokenSharedpref();
+    updateBiometrics(false);
   }
 }

@@ -10,6 +10,8 @@ void myCupertinoDialog(
   String confirm,
   Function fCancel,
   Function fConfirm,
+  Color? color1,
+  Color? color2,
 ) {
   showCupertinoDialog(
     context: context,
@@ -35,7 +37,8 @@ void myCupertinoDialog(
                 },
                 child: Text(
                   cancel,
-                  style: TextStyle(color: CupertinoColors.destructiveRed),
+                  style: TextStyle(
+                      color: color1 ?? CupertinoColors.destructiveRed),
                 ),
               ),
               CupertinoDialogAction(
@@ -45,7 +48,7 @@ void myCupertinoDialog(
                 },
                 child: Text(
                   confirm,
-                  style: TextStyle(color: CupertinoColors.activeBlue),
+                  style: TextStyle(color: color2 ?? CupertinoColors.activeBlue),
                 ),
               ),
             ],

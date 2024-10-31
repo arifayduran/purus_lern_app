@@ -14,7 +14,7 @@ class LocalAuthService {
     }
   }
 
-  Future<bool> isBiometricAvailable() async {
+  Future<bool> isBiometricsAvailable() async {
     if (currentPlatform != "Web" && currentPlatform != "Unknown") {
       try {
         return await _auth.canCheckBiometrics &&

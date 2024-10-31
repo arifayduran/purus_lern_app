@@ -18,5 +18,4 @@ Future<void> getAppInfo() async {
   debugPrint('Build Number: $buildNumber');
   debugPrint('Build Signature: $buildSignature');
   debugPrint('Installer Store: $installerStore');
-  debugPrint("-------------");
 }

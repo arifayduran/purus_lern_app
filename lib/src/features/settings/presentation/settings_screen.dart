@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:purus_lern_app/src/config/const_stay_logged_in_days.dart';
 import 'package:purus_lern_app/src/core/firebase/firebase_analytics/log_any.dart';
 import 'package:purus_lern_app/src/core/get_app_info.dart';
 import 'package:purus_lern_app/src/core/presentation/loading_blur_states.dart';
@@ -10,13 +12,13 @@ import 'package:purus_lern_app/src/data/home_screen_index_state.dart';
 import 'package:purus_lern_app/src/features/authentication/application/moodle/profile_image_uploader.dart';
 import 'package:purus_lern_app/src/features/authentication/application/moodle/refresh_user_info_from_id.dart';
 import 'package:purus_lern_app/src/features/authentication/application/moodle/get_user_info_from_login.dart';
+import 'package:purus_lern_app/src/features/authentication/application/print_new_autologgin.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_dont_ask_me_again_sharedpred.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_sharedpref.dart';
 import 'package:purus_lern_app/src/features/authentication/application/go_to_biometric_settings.dart';
 import 'package:purus_lern_app/src/features/authentication/application/local_auth/check_biometric_availability.dart';
 import 'package:purus_lern_app/src/features/authentication/application/local_auth/local_auth_service.dart';
 import 'package:purus_lern_app/src/features/authentication/application/local_auth/refresh_biometric_state.dart';
-import 'package:purus_lern_app/src/features/authentication/application/logout.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/onboarding_status_sharedpref.dart';
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
@@ -47,14 +49,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _tempPrintUserInfoController.text = currentUser!.username;
     _timer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
       refreshUserInfo();
+      _refreshBiometricState();
     });
     super.initState();
   }
 
   void refreshUserInfo() async {
     currentUser = await refreshUserinfoFromId(currentUser!.id);
-    if (!mounted) return;
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _refreshBiometricState() async {
+    await refreshBiometricState(context, false, false);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _checkBiometrics() async {
@@ -76,7 +87,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         setState(() {});
         await checkBiometricAvailability();
-        if (!isBiometricAvailable.value) {
+        if (!isBiometricsAvailable.value) {
           setState(() {});
           if (mounted) {
             mySnackbar(context,
@@ -90,6 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
+      await updateBiometrics(false);
       debugPrint(e.toString());
       if (mounted) {
         mySnackbar(context,
@@ -196,7 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text("erlaubnis für biometrische anmeldung")),
             TextButton(
                 onPressed: () {
-                  refreshBiometricState(context, mounted, true);
+                  _refreshBiometricState();
                 },
                 child: Text(
                     "Refresh biometric state auto wie loginplace / App Neustarten hinweisen?")),
@@ -204,25 +216,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () {
                   loadingValueNotifierBlur.value = true;
                   myCupertinoDialog(
-                      context,
-                      "Ausloggen",
-                      "Möchten Sie sich ausloggen?",
-                      null,
-                      null,
-                      "Abbrechen",
-                      "Ja", () {
-                    loadingValueNotifierBlur.value = false;
-                  }, () {
-                    // loadingValueNotifierBlur.value = false;
-                    loadingValueNotifierBlur.value = true;
-                    loadingValueNotifierBlurOpacity.value = 0.6;
-                    loadingValueNotifierAnimation.value = true;
-                    loadingValueNotifierText.value = "Sie werden Abgemeldet...";
+                    context,
+                    "Ausloggen",
+                    "Möchten Sie sich ausloggen?",
+                    null,
+                    null,
+                    "Abbrechen",
+                    "Ja",
+                    () {
+                      loadingValueNotifierBlur.value = false;
+                    },
+                    () {
+                      // loadingValueNotifierBlur.value = false;
+                      loadingValueNotifierBlur.value = true;
+                      loadingValueNotifierBlurOpacity.value = 0.6;
+                      loadingValueNotifierAnimation.value = true;
+                      loadingValueNotifierText.value =
+                          "Sie werden Abgemeldet...";
 
-                    _timer!.cancel();
-                    homeScreenIndexState.value = 4;
-                    // logout(context);
-                  });
+                      _timer!.cancel();
+                      homeScreenIndexState.value = 4;
+                      // logout(context);
+                    },
+                    CupertinoColors.activeBlue,
+                    CupertinoColors.destructiveRed,
+                  );
                 },
                 child: const Text("Logout")),
             isAutoLoggedIn
@@ -236,7 +254,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           .setLoginStatus(true, currentUser!, userToken!);
                       isAutoLoggedIn =
                           await StayLoggedInSharedpref().checkLoginStatus();
+                      if (mounted) {
+                        // ignore: use_build_context_synchronously
+                        mySnackbar(context,
+                            "Automatische Anmeldung für $constStayLoggedInDays Tage eingerichtet.");
+                      }
+
                       setState(() {});
+                      printNewAutologgin();
                     },
                     child: const Text("Auto-Login aktivieren"),
                   ),
@@ -245,7 +270,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () async {
                   isOnboardingNotComplete = true;
                   await OnboardingStatusSharedpref()
-                      .setOnboardingStatusSharedpref(false);
+                      .setOnboardingStatusSharedpref(true);
+                  debugPrint("-------------");
+                  debugPrint("isOnboardingNotComplete: true");
+                  debugPrint("-------------");
                 },
                 child: const Text("Reset Onboarding")),
             TextButton(
@@ -261,7 +289,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               height: 110,
               width: 200,
               child: ValueListenableBuilder<bool>(
-                valueListenable: isBiometricAvailable,
+                valueListenable: isBiometricsAvailable,
                 builder: (context1, value, child) {
                   if (value) {
                     if (isBiometricsConfigured) {
@@ -280,13 +308,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 loadingValueNotifierBlur.value = false;
                               },
                               () async {
-                                setState(() {
-                                  isBiometricsConfigured = false;
-                                });
+                                await updateBiometrics(false);
+                                setState(() {});
                                 loadingValueNotifierBlur.value = false;
-                                await BiometricsSharedpref()
-                                    .setBiometricsConfigured(false);
+                                if (mounted) {
+                                  // ignore: use_build_context_synchronously
+                                  mySnackbar(context,
+                                      "Biometrisches Anmeldeverfahren erfolgreich ausgeschaltet.");
+                                }
                               },
+                              CupertinoColors.activeBlue,
+                              CupertinoColors.destructiveRed,
                             );
                           },
                           child: const Text(
@@ -305,9 +337,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 "Nein",
                                 "Ja",
                                 () {
+                                  logAny("isAutoLoggedIn", "false");
                                   loadingValueNotifierBlur.value = false;
                                 },
                                 () async {
+                                  logAny("isAutoLoggedIn", "true");
                                   loadingValueNotifierBlur.value = false;
 
                                   await StayLoggedInSharedpref().setLoginStatus(
@@ -315,9 +349,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   isAutoLoggedIn =
                                       await StayLoggedInSharedpref()
                                           .checkLoginStatus();
+                                  if (mounted) {
+                                    // ignore: use_build_context_synchronously
+                                    mySnackbar(context,
+                                        "Automatische Anmeldung für $constStayLoggedInDays Tage eingerichtet.");
+                                  }
+
                                   setState(() {});
                                   _checkBiometrics();
+                                  printNewAutologgin();
                                 },
+                                CupertinoColors.destructiveRed,
+                                CupertinoColors.activeBlue,
                               );
                             } else {
                               _checkBiometrics();

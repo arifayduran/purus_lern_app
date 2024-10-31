@@ -8,6 +8,6 @@ bool isBiometricsConfigured = false;
 bool biometricAskedBeforeAndNo = false;
 
 // UI bedingt
-ValueNotifier<bool> isBiometricAvailable = ValueNotifier<bool>(false);
+ValueNotifier<bool> isBiometricsAvailable = ValueNotifier<bool>(false);
 ValueNotifier<bool> isDeviceSupportedForBiometric = ValueNotifier<bool>(false);
 late String availableBiometricsString;

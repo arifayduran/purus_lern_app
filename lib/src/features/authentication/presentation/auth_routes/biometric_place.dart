@@ -36,6 +36,8 @@ class _BiometricPlaceState extends State<BiometricPlace>
   void initState() {
     super.initState();
 
+    _refreshBiometricState();
+
     _updateAvailableBioStringTimer =
         Timer.periodic(Duration(seconds: 3), (Timer timer) {
       _refreshBiometricState();
@@ -65,7 +67,9 @@ class _BiometricPlaceState extends State<BiometricPlace>
 
   Future<void> _refreshBiometricState() async {
     await refreshBiometricState(context, false, false);
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _checkBiometrics() async {
@@ -104,7 +108,7 @@ class _BiometricPlaceState extends State<BiometricPlace>
           pageBuilder: (context, animation, secondaryAnimation) {
             return FadeTransition(
               opacity: _fadeAnimation,
-              child:  HomeScreen(),
+              child: HomeScreen(),
             );
           },
           transitionDuration: const Duration(milliseconds: 1200),
@@ -132,7 +136,12 @@ class _BiometricPlaceState extends State<BiometricPlace>
               children: [
                 GestureDetector(
                   onTap: () {
-                    _checkBiometrics();
+                    if (isBiometricsConfigured) {
+                      _checkBiometrics();
+                    } else {
+                      mySnackbar(context,
+                          "Biometrics sind nicht mehr Konfiguriert, bitte richten Sie es in klassischen Login ein.");
+                    }
                   },
                   child: ScaleTransition(
                     scale: _scaleAnimation,

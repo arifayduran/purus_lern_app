@@ -20,8 +20,6 @@ import "package:purus_lern_app/src/features/authentication/presentation/auth_rou
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
-  
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -119,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (mounted) {
       if (isAutoLoggedIn) {
-        if (isBiometricAvailable.value && isBiometricsConfigured) {
+        if (isBiometricsAvailable.value && isBiometricsConfigured) {
           setState(() {
             placeRouteNotifier.value = "Biometric";
           });

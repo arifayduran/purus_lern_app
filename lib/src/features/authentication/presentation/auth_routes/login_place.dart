@@ -6,6 +6,7 @@ import "package:flutter/services.dart";
 import "package:flutter_sficon/flutter_sficon.dart";
 import "package:flutter_svg/svg.dart";
 import "package:purus_lern_app/src/config/palette.dart";
+import "package:purus_lern_app/src/config/const_stay_logged_in_days.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_any.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_errors.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_login.dart";
@@ -14,6 +15,7 @@ import "package:purus_lern_app/src/core/presentation/home_screen.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/refresh_biometric_state.dart";
 import "package:purus_lern_app/src/features/authentication/application/moodle/login_req.dart";
 import "package:purus_lern_app/src/config/local_auth_assets.dart";
+import "package:purus_lern_app/src/features/authentication/application/print_new_autologgin.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_dont_ask_me_again_sharedpred.dart";
 import "package:purus_lern_app/src/features/authentication/data/shared_prefs/biometrics_sharedpref.dart";
 import "package:purus_lern_app/src/features/authentication/application/local_auth/check_biometric_availability.dart";
@@ -70,7 +72,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   bool _showSecondAnimation = false;
 
   final LocalAuthService _localAuthService = LocalAuthService();
-  bool _isBiometricProcessing = false;
+  bool _isBlurEffect = false;
   bool _isConfigBiometricDone = false;
   bool _dontAskMeAgain = false;
 
@@ -79,6 +81,11 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
+    if (currentUser != null && isAutoLoggedIn) {
+      _usernameController.text = currentUser!.username;
+      _stayLoggedBox = true;
+    }
 
     _updateAvailableBioStringTimer =
         Timer.periodic(Duration(seconds: 3), (Timer timer) {
@@ -145,35 +152,174 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
 
       TextInput.finishAutofillContext();
 
-      currentUser = await getUserinfoFromLogin(_usernameController.text);
+      if (isAutoLoggedIn) {
+        if (currentUser!.email.toLowerCase() ==
+                _usernameController.text.toLowerCase() ||
+            currentUser!.username.toLowerCase() ==
+                _usernameController.text.toLowerCase()) {
+          currentUser = await getUserinfoFromLogin(_usernameController.text);
 
-      if (_stayLoggedBox) {
-        logAny("isAutoLoggedIn", "true");
-        isAutoLoggedIn = true;
-        StayLoggedInSharedpref()
-            .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
-      } else {
-        logAny("isAutoLoggedIn", "false");
-        isAutoLoggedIn = false;
-        StayLoggedInSharedpref().setLoginStatus(_stayLoggedBox, null, null);
-      }
+          if (_stayLoggedBox) {
+            logAny("isAutoLoggedIn", "true");
+            await StayLoggedInSharedpref()
+                .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
+            isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+            printNewAutologgin();
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              mySnackbar(context,
+                  "Die Auto-Login-Tage wurden wieder auf $constStayLoggedInDays Tage zurückgesetzt.");
+            }
 
-      if (isBiometricAvailable.value &&
-          !isBiometricsConfigured &&
-          !_isConfigBiometricDone &&
-          !biometricAskedBeforeAndNo) {
-        // ignore: use_build_context_synchronously
-        _askConfigBiometricAfterLogin(context);
-      } else if (isBiometricAvailable.value && _isConfigBiometricDone) {
-        await updateBiometrics(true);
-        _routeToHomeScreen();
+            if (isBiometricsConfigured) {
+              _routeToHomeScreen();
+            } else {
+              if (isBiometricsAvailable.value &&
+                  !isBiometricsConfigured &&
+                  !_isConfigBiometricDone &&
+                  !biometricAskedBeforeAndNo) {
+                if (mounted) {
+                  // ignore: use_build_context_synchronously
+                  _askConfigBiometricsAfterLogin(context);
+                }
+              } else if (isBiometricsAvailable.value &&
+                  _isConfigBiometricDone) {
+                await updateBiometrics(true);
+                _routeToHomeScreen();
+              } else {
+                _routeToHomeScreen();
+              }
+            }
+          } else {
+            if (isBiometricsConfigured && mounted) {
+              // ignore: use_build_context_synchronously
+              _askStayLoggedInAfterLoginForConfigured(context);
+            } else {
+              if (isBiometricsAvailable.value &&
+                  !isBiometricsConfigured &&
+                  !_isConfigBiometricDone &&
+                  !biometricAskedBeforeAndNo) {
+                if (mounted) {
+                  // ignore: use_build_context_synchronously
+                  _askConfigBiometricsAfterLogin(context);
+                }
+                // } else if (isBiometricsAvailable.value && _isConfigBiometricDone) {
+                //   await updateBiometrics(true);
+                //   _routeToHomeScreen();
+              } else {
+                _routeToHomeScreen();
+              }
+            }
+          }
+        } else {
+          await StayLoggedInSharedpref().sharedLogout();
+          debugPrint("-------------");
+          debugPrint("Username ${currentUser!.username} wurde ausgeloggt.");
+          debugPrint("-------------");
+          isAutoLoggedIn = false;
+          currentUser = null;
+          //  userToken = null; // Wird überschrieben durch den login
+          configuredAutoLoginDate = null;
+          remainingAutoLoggedInAsDays = null;
+
+          currentUser = await getUserinfoFromLogin(_usernameController.text);
+
+          if (_stayLoggedBox) {
+            logAny("isAutoLoggedIn", "true");
+
+            await StayLoggedInSharedpref()
+                .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
+            isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+
+            printNewAutologgin();
+
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              mySnackbar(context,
+                  "Automatische Anmeldung für $constStayLoggedInDays Tage eingerichtet.");
+            }
+
+            if (isBiometricsAvailable.value &&
+                !isBiometricsConfigured &&
+                !_isConfigBiometricDone &&
+                !biometricAskedBeforeAndNo) {
+              if (mounted) {
+                // ignore: use_build_context_synchronously
+                _askConfigBiometricsAfterLogin(context);
+              }
+            } else if (isBiometricsAvailable.value && _isConfigBiometricDone) {
+              await updateBiometrics(true);
+              _routeToHomeScreen();
+            } else {
+              _routeToHomeScreen();
+            }
+          } else {
+            if (isBiometricsAvailable.value &&
+                !isBiometricsConfigured &&
+                !_isConfigBiometricDone &&
+                !biometricAskedBeforeAndNo) {
+              if (mounted) {
+                // ignore: use_build_context_synchronously
+                _askConfigBiometricsAfterLogin(context);
+              }
+              // } else if (isBiometricsAvailable.value && _isConfigBiometricDone) {
+              //   await updateBiometrics(true);
+              //   _routeToHomeScreen();
+            } else {
+              _routeToHomeScreen();
+            }
+          }
+        }
       } else {
-        _routeToHomeScreen();
+        currentUser = await getUserinfoFromLogin(_usernameController.text);
+
+        if (_stayLoggedBox) {
+          logAny("isAutoLoggedIn", "true");
+
+          await StayLoggedInSharedpref()
+              .setLoginStatus(_stayLoggedBox, currentUser!, userToken!);
+          isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+
+          if (mounted) {
+            // ignore: use_build_context_synchronously
+            mySnackbar(context,
+                "Automatische Anmeldung für $constStayLoggedInDays Tage eingerichtet.");
+          }
+
+          printNewAutologgin();
+
+          if (isBiometricsAvailable.value &&
+              !isBiometricsConfigured &&
+              !_isConfigBiometricDone &&
+              !biometricAskedBeforeAndNo) {
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              _askConfigBiometricsAfterLogin(context);
+            }
+          } else if (isBiometricsAvailable.value && _isConfigBiometricDone) {
+            await updateBiometrics(true);
+            _routeToHomeScreen();
+          } else {
+            _routeToHomeScreen();
+          }
+        } else {
+          if (isBiometricsAvailable.value &&
+              !isBiometricsConfigured &&
+              !_isConfigBiometricDone &&
+              !biometricAskedBeforeAndNo) {
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              _askConfigBiometricsAfterLogin(context);
+            }
+            // } else if (isBiometricsAvailable.value && _isConfigBiometricDone) {
+            //   await updateBiometrics(true);
+            //   _routeToHomeScreen();
+          } else {
+            _routeToHomeScreen();
+          }
+        }
       }
     }
-    // if (_formKey.currentState!.validate()) {
-    // } else {
-    // }
   }
 
   void _alertTextAndTextfieldStrokeUpdate() {
@@ -246,11 +392,261 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     }
   }
 
-  void _askConfigBiometricAfterLogin(
+  void _askStayLoggedInAfterLogin(BuildContext context) {
+    if (mounted) {
+      setState(() {
+        _isBlurEffect = true;
+      });
+      myCupertinoDialog(
+        // ignore: use_build_context_synchronously
+        context,
+        "Auto-Login Aus",
+        "Möchten Sie automatisches Anmelden einschalten, um Biometrics zu benutzen?",
+        null,
+        null,
+        "Nein",
+        "Ja",
+        () async {
+          logAny("isAutoLoggedIn", "false");
+          await StayLoggedInSharedpref().setLoginStatus(false, null, null);
+          isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+          await updateBiometrics(false);
+          printNewAutologgin();
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = false;
+          });
+          if (mounted) {
+            // ignore: use_build_context_synchronously
+            mySnackbar(context,
+                "Biometrisches Anmeldeverfahren kann nicht ohne Auto-Login eingerichtet werden.");
+          }
+          _routeToHomeScreen();
+        },
+        () async {
+          logAny("isAutoLoggedIn", "true");
+          await StayLoggedInSharedpref()
+              .setLoginStatus(true, currentUser!, userToken!);
+          isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+          if (mounted) {
+            // ignore: use_build_context_synchronously
+            mySnackbar(context,
+                "Automatische Anmeldung für $constStayLoggedInDays Tage eingerichtet.");
+          }
+
+          printNewAutologgin();
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = true;
+          });
+          if (_isConfigBiometricDone && isBiometricsAvailable.value) {
+            await updateBiometrics(true);
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              mySnackbar(context,
+                  "Biometrisches Anmeldeverfahren erfolgreich eingerichtet.");
+            }
+            _routeToHomeScreen();
+          } else {
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              _checkBiometricsAfterLogin();
+            }
+          }
+        },
+
+        CupertinoColors.destructiveRed, CupertinoColors.activeBlue,
+      );
+    }
+  }
+
+  void _askStayLoggedInAfterLoginForConfigured(BuildContext context) {
+    if (mounted) {
+      setState(() {
+        _isBlurEffect = true;
+      });
+      myCupertinoDialog(
+        // ignore: use_build_context_synchronously
+        context,
+        "Auto-Login Aus",
+        "Möchten Sie automatisches Anmelden einschalten, um Biometrics zu benutzen?",
+        null,
+        null,
+        "Nein",
+        "Ja",
+        () async {
+          logAny("isAutoLoggedIn", "false");
+          await StayLoggedInSharedpref().setLoginStatus(false, null, null);
+          isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+          await updateBiometrics(false);
+          printNewAutologgin();
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = false;
+          });
+          if (mounted) {
+            // ignore: use_build_context_synchronously
+            mySnackbar(context,
+                "Biometrisches Anmeldeverfahren kann nicht ohne Auto-Login benutzt werden.");
+          }
+          _routeToHomeScreen();
+        },
+        () async {
+          logAny("isAutoLoggedIn", "true");
+          await StayLoggedInSharedpref()
+              .setLoginStatus(true, currentUser!, userToken!);
+          isAutoLoggedIn = await StayLoggedInSharedpref().checkLoginStatus();
+          if (mounted) {
+            // ignore: use_build_context_synchronously
+            mySnackbar(context,
+                "Automatische Anmeldung für $constStayLoggedInDays Tage eingerichtet.");
+          }
+
+          printNewAutologgin();
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = true;
+          });
+          _routeToHomeScreen();
+        },
+
+        CupertinoColors.destructiveRed, CupertinoColors.activeBlue,
+      );
+    }
+  }
+
+  void _askStayLoggedInForConfig(BuildContext context) {
+    if (mounted) {
+      setState(() {
+        _isBlurEffect = true;
+      });
+      myCupertinoDialog(
+        // ignore: use_build_context_synchronously
+        context,
+        "Auto-Login Aus",
+        "Möchten Sie das automatische Anmelden einschalten, um Biometrics zu benutzen?",
+        null,
+        null,
+        "Nein",
+        "Ja",
+        () {
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = false;
+          });
+        },
+        () {
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = true;
+          });
+          _checkBiometricsToConfig();
+        },
+        CupertinoColors.destructiveRed,
+        CupertinoColors.activeBlue,
+      );
+    }
+  }
+
+  void _askDeleteConfigBiometricDoneToggle(BuildContext context) {
+    if (mounted) {
+      setState(() {
+        _isBlurEffect = true;
+      });
+      myCupertinoDialog(
+        // ignore: use_build_context_synchronously
+        context,
+        "Achtung!",
+        "Wenn Sie 'Angemeldet bleiben' abwählen, wird die einrichtung der Biometrics gelöscht.",
+        null,
+        null,
+        "Abbrechen",
+        "Abwählen",
+        () {
+          setState(() {
+            _isBlurEffect = false;
+          });
+        },
+        () {
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = false;
+            _isConfigBiometricDone = false;
+          });
+        },
+        CupertinoColors.activeBlue,
+        CupertinoColors.destructiveRed,
+      );
+    }
+  }
+
+  void _askDeleteConfigBiometricDone(BuildContext context) {
+    if (mounted) {
+      setState(() {
+        _isBlurEffect = true;
+      });
+      myCupertinoDialog(
+        // ignore: use_build_context_synchronously
+        context,
+        "Achtung!",
+        "Möchten Sie, dass die Einrichtung der Biometrics gelöscht wird?",
+        null,
+        null,
+        "Abbrechen",
+        "Ja",
+        () {
+          setState(() {
+            _isBlurEffect = false;
+          });
+        },
+        () {
+          setState(() {
+            _isBlurEffect = false;
+            _isConfigBiometricDone = false;
+          });
+        },
+        CupertinoColors.activeBlue,
+        CupertinoColors.destructiveRed,
+      );
+    }
+  }
+
+  void _warningStayLoggedInAutoMode(BuildContext context) {
+    if (mounted) {
+      setState(() {
+        _isBlurEffect = true;
+      });
+      myCupertinoDialog(
+        // ignore: use_build_context_synchronously
+        context,
+        "Achtung!",
+        "Wenn Sie 'Angemeldet bleiben' abwählen, werden Ihre Biometrics Einrichtungen nach der Anmeldung gelöscht.",
+        null,
+        null,
+        "Abbrechen",
+        "Abwählen",
+        () {
+          setState(() {
+            _isBlurEffect = false;
+          });
+        },
+        () {
+          setState(() {
+            _isBlurEffect = false;
+            _stayLoggedBox = false;
+          });
+        },
+        CupertinoColors.activeBlue,
+        CupertinoColors.destructiveRed,
+      );
+    }
+  }
+
+  void _askConfigBiometricsAfterLogin(
     BuildContext context,
   ) {
     setState(() {
-      _isBiometricProcessing = true;
+      _isBlurEffect = true;
     });
 
     showCupertinoDialog(
@@ -302,7 +698,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                 CupertinoDialogAction(
                   onPressed: () async {
                     setState(() {
-                      _isBiometricProcessing = false;
+                      _isBlurEffect = false;
                     });
 
                     await updateBiometrics(false);
@@ -336,11 +732,22 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                       await BiometricsDontAskMeAgainSharedpref()
                           .setDontAskAgainPreference(true);
                     }
-                    if (mounted) {
-                      // ignore: use_build_context_synchronously
-                      Navigator.pop(context1);
+                    if (_stayLoggedBox) {
+                      if (mounted) {
+                        // ignore: use_build_context_synchronously
+                        Navigator.pop(context1);
+                      }
+                      _checkBiometricsAfterLogin();
+                    } else {
+                      if (mounted) {
+                        // ignore: use_build_context_synchronously
+                        Navigator.pop(context1);
+                      }
+                      if (mounted) {
+                        // ignore: use_build_context_synchronously
+                        _askStayLoggedInAfterLogin(context);
+                      }
                     }
-                    await _checkBiometricsAfterLogin();
                   },
                   child: const Text(
                     "Ja",
@@ -358,24 +765,23 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   Future<void> _checkBiometricsAfterLogin() async {
     try {
       setState(() {
-        _isBiometricProcessing = true;
+        _isBlurEffect = true;
       });
       bool authenticated = await _localAuthService.authenticateUser();
       setState(() {
-        _isBiometricProcessing = false;
+        _isBlurEffect = false;
       });
       if (authenticated) {
         await updateBiometrics(true);
-        _routeToHomeScreen();
         if (mounted) {
           mySnackbar(context,
               "Biometrisches Anmeldeverfahren erfolgreich eingerichtet.");
         }
+        _routeToHomeScreen();
       } else {
         await updateBiometrics(false);
-        _routeToHomeScreen();
         await checkBiometricAvailability();
-        if (!isBiometricAvailable.value) {
+        if (!isBiometricsAvailable.value) {
           setState(() {});
           if (mounted) {
             mySnackbar(context,
@@ -387,6 +793,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
             }
           }
         }
+        _routeToHomeScreen();
       }
     } catch (e) {
       debugPrint("-------------");
@@ -403,37 +810,45 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
     BuildContext context,
   ) {
     setState(() {
-      _isBiometricProcessing = true;
+      _isBlurEffect = true;
     });
     myCupertinoDialog(
-        context,
-        null,
-        "Möchten Sie biometrisches Anmeldeverfahren einrichten?",
-        null,
-        null,
-        "Nein",
-        "Ja", () {
-      setState(() {
-        _isBiometricProcessing = false;
-        _isConfigBiometricDone = false;
-      });
-      mySnackbar(context,
-          "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
-    }, () {
-      _checkBiometricsToConfig();
-    });
+      context,
+      null,
+      "Möchten Sie biometrisches Anmeldeverfahren einrichten?",
+      null,
+      null,
+      "Nein",
+      "Ja",
+      () {
+        mySnackbar(context,
+            "Sie können biometrisches Anmeldeverfahren jederzeit in den Einstellungen einrichten.");
+        setState(() {
+          _isBlurEffect = false;
+          _isConfigBiometricDone = false;
+        });
+      },
+      () {
+        if (_stayLoggedBox) {
+          _checkBiometricsToConfig();
+        } else {
+          _askStayLoggedInForConfig(context);
+        }
+      },
+      CupertinoColors.destructiveRed,
+      CupertinoColors.activeBlue,
+    );
   }
 
   Future<void> _checkBiometricsToConfig() async {
     try {
       setState(() {
-        _isBiometricProcessing = true;
+        _isBlurEffect = true;
       });
 
       bool authenticated = await _localAuthService.authenticateUser();
 
       setState(() {
-        _isBiometricProcessing = false;
         _isConfigBiometricDone = authenticated;
       });
 
@@ -443,11 +858,14 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
             context,
             "Nach erfolgreicher Anmeldung ist das Biometrische Anmeldeverfahren automatisch eingerichtet.",
           );
+          setState(() {
+            _isBlurEffect = false;
+          });
         }
       } else {
         await checkBiometricAvailability();
 
-        if (!isBiometricAvailable.value && mounted) {
+        if (!isBiometricsAvailable.value && mounted) {
           mySnackbar(
             context,
             "Erlaubnis für biometrisches Anmeldeverfahren fehlt. Sie können es jederzeit nach Erlaubniserteilung in den Einstellungen einrichten.",
@@ -458,6 +876,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
             "Fehler bei der Einrichtung. Sie können es jederzeit in den Einstellungen einrichten.",
           );
         }
+        setState(() {
+          _isBlurEffect = false;
+        });
       }
     } catch (e) {
       debugPrint("-------------");
@@ -467,17 +888,20 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
         mySnackbar(context,
             "Fehler bei der Einrichtung. Sie können es jederzeit in den Einstellungen einrichten.");
       }
+      setState(() {
+        _isBlurEffect = false;
+      });
     }
   }
 
   Future<void> _checkBiometrics() async {
     try {
       setState(() {
-        _isBiometricProcessing = true;
+        _isBlurEffect = true;
       });
       bool authenticated = await _localAuthService.authenticateUser();
       setState(() {
-        _isBiometricProcessing = false;
+        _isBlurEffect = false;
       });
       if (authenticated) {
         _routeToHomeScreen();
@@ -517,10 +941,9 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
 
   Future<void> _refreshBiometricState() async {
     await refreshBiometricState(context, false, false);
-    if (availableBiometricsString == "Biometrics sind nicht aktiv") {
-      _isConfigBiometricDone = false;
+    if (mounted) {
+      setState(() {});
     }
-    setState(() {});
   }
 
   @override
@@ -669,9 +1092,31 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                 GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
-                                    setState(() {
-                                      _stayLoggedBox = !_stayLoggedBox;
-                                    });
+                                    if (currentUser != null) {
+                                      if (currentUser!.email.toLowerCase() ==
+                                              _usernameController.text
+                                                  .toLowerCase() ||
+                                          currentUser!.username.toLowerCase() ==
+                                              _usernameController.text
+                                                  .toLowerCase()) {
+                                        if (_stayLoggedBox &&
+                                            _isConfigBiometricDone) {
+                                          _askDeleteConfigBiometricDoneToggle(
+                                              context);
+                                        } else if (_stayLoggedBox &&
+                                            isBiometricsConfigured) {
+                                          _warningStayLoggedInAutoMode(context);
+                                        } else {
+                                          setState(() {
+                                            _stayLoggedBox = !_stayLoggedBox;
+                                          });
+                                        }
+                                      }
+                                    } else {
+                                      setState(() {
+                                        _stayLoggedBox = !_stayLoggedBox;
+                                      });
+                                    }
                                   },
                                   child: SizedBox(
                                     height: 19 + _columnSpacing * 2,
@@ -811,21 +1256,27 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                 ),
                                 // if (!isKeyboardVisible)
                                 ValueListenableBuilder<bool>(
-                                  valueListenable: isBiometricAvailable,
+                                  valueListenable: isBiometricsAvailable,
                                   builder: (context, value, child) {
                                     if (value) {
                                       return GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
+                                        // behavior: HitTestBehavior.opaque,
                                         onTap: () {
-                                          if (isBiometricsConfigured) {
+                                          if (isBiometricsConfigured &&
+                                              isAutoLoggedIn) {
                                             _checkBiometrics();
                                           } else {
-                                            _askConfigBiometric(context);
+                                            if (_isConfigBiometricDone) {
+                                              _askDeleteConfigBiometricDone(
+                                                  context);
+                                            } else {
+                                              _askConfigBiometric(context);
+                                            }
                                           }
                                         },
                                         child: SizedBox(
                                           height: 90,
-                                          width: 150,
+                                          width: 320,
                                           child: Stack(
                                             clipBehavior: Clip.none,
                                             children: [
@@ -835,7 +1286,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                                   alignment: Alignment.center,
                                                   child: SizedBox(
                                                     height: 50,
-                                                    width: 150,
+                                                    width: 320,
                                                     child: ScaleTransition(
                                                       scale: _scaleAnimation,
                                                       child: availableBiometricsString !=
@@ -860,7 +1311,8 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                                   ),
                                                 ),
                                               ),
-                                              _isConfigBiometricDone
+                                              _isConfigBiometricDone &&
+                                                      _stayLoggedBox
                                                   ? const Positioned(
                                                       top: -12,
                                                       right: 28,
@@ -870,14 +1322,15 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                               Positioned(
                                                 bottom: 10,
                                                 left: 0,
-                                                width: 150,
+                                                width: 320,
                                                 child: Align(
                                                   alignment: Alignment.center,
                                                   child: Text(
                                                     availableBiometricsString !=
                                                             "Biometrics sind nicht aktiv"
-                                                        ? "${isBiometricsConfigured ? "Mit " : ""}$availableBiometricsString ${isBiometricsConfigured ? "Anmelden" : _isConfigBiometricDone ? "ist eingerichtet" : "einrichten"}"
+                                                        ? "${isBiometricsConfigured && isAutoLoggedIn ? "Mit " : ""}$availableBiometricsString ${isBiometricsConfigured && isAutoLoggedIn ? 'als "${currentUser!.fullname}" Anmelden' : _isConfigBiometricDone && _stayLoggedBox ? "ist eingerichtet" : "einrichten"}"
                                                         : "Biometrics sind nicht aktiv",
+                                                    textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 10,
@@ -911,7 +1364,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            if (_isBiometricProcessing)
+            if (_isBlurEffect)
               Positioned(
                 top: 0,
                 child: BackdropFilter(

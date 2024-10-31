@@ -17,7 +17,7 @@ Future<void> logAppStartEvent() async {
         "isOnboardingNotComplete": isOnboardingNotComplete.toString(),
         "isBiometricsConfigured": isBiometricsConfigured.toString(),
         "biometricAskedBeforeAndNo": biometricAskedBeforeAndNo.toString(),
-        "isBiometricAvailable": isBiometricAvailable.value.toString(),
+        "isBiometricsAvailable": isBiometricsAvailable.value.toString(),
         "isDeviceSupportedForBiometric":
             isDeviceSupportedForBiometric.value.toString(),
         "availableBiometricsString": availableBiometricsString.toString(),

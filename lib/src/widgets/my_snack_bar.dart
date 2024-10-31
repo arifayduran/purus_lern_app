@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 void mySnackbar(BuildContext context, String text) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
     if (ScaffoldMessenger.of(context).mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

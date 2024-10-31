@@ -100,7 +100,10 @@ class _OnboardingPlaceState extends State<OnboardingPlace> {
                   TextButton(
                       onPressed: () async {
                         await OnboardingStatusSharedpref()
-                            .setOnboardingStatusSharedpref(true);
+                            .setOnboardingStatusSharedpref(false);
+                        debugPrint("-------------");
+                        debugPrint("isOnboardingNotComplete: false");
+                        debugPrint("-------------");
                         await logOnboardingSkipped();
                         if (isBiometricsConfigured) {
                           widget.transitionToRoute("Biometric");
@@ -116,7 +119,10 @@ class _OnboardingPlaceState extends State<OnboardingPlace> {
                     onPressed: () async {
                       if (_currentPage == widget.pages.length - 1) {
                         await OnboardingStatusSharedpref()
-                            .setOnboardingStatusSharedpref(true);
+                            .setOnboardingStatusSharedpref(false);
+                        debugPrint("-------------");
+                        debugPrint("isOnboardingNotComplete: false");
+                        debugPrint("-------------");
                         await logOnboardingDone();
                         if (isBiometricsConfigured) {
                           widget.transitionToRoute("Biometric");
