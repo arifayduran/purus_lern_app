@@ -9,7 +9,6 @@ import 'package:purus_lern_app/src/core/presentation/logout_empty_screen.dart';
 import 'package:purus_lern_app/src/data/home_screen_index_state.dart';
 import 'package:purus_lern_app/src/data/main_conditions.dart';
 import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
-import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:purus_lern_app/src/features/chatbot/application/chatbot_random_message.dart';
 import 'package:purus_lern_app/src/features/chatbot/data/chatbot_current_message.dart';
 import 'package:purus_lern_app/src/widgets/my_animated_bottom_bar_widget.dart';

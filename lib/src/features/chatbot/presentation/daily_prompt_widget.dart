@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:purus_lern_app/src/config/palette.dart";
 import "package:purus_lern_app/src/features/chatbot/data/shared_prefs/daily_prompts_sharedpref.dart";
 
 class DailyPromptWidget extends StatefulWidget {
@@ -61,6 +62,24 @@ class _DailyPromptWidgetState extends State<DailyPromptWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Text("Prompts übrig: ${currentDailyPrompt.toString()} (Täglich 50)");
+    return Text(
+      getStringOfPrompts(currentDailyPrompt),
+      style: TextStyle(
+        fontSize: 9,
+        fontWeight: FontWeight.w500,
+        color: const Color.fromARGB(255, 227, 227, 227),
+      ),
+    );
+  }
+}
+
+String getStringOfPrompts(int currentDailyPrompt) {
+  switch (currentDailyPrompt) {
+    case 0:
+      return "Keine Fragen mehr übrig";
+    case 1:
+      return "Letzte übrige Frage";
+    default:
+      return "$currentDailyPrompt Fragen übrig";
   }
 }

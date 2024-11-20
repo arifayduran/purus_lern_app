@@ -1315,7 +1315,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                                       _stayLoggedBox
                                                   ? const Positioned(
                                                       top: -12,
-                                                      right: 28,
+                                                      right: 113,
                                                       child:
                                                           MyAnimatedCheckmark())
                                                   : const SizedBox(),

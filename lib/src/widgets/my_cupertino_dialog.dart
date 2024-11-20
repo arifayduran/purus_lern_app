@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 void myCupertinoDialog(
   BuildContext context,
   String? title,
-  String description,
+  String? description,
   Widget? widget1,
   Widget? widget2,
   String cancel,
@@ -22,9 +22,11 @@ void myCupertinoDialog(
             title: title != null ? Text(title) : null,
             content: Column(
               children: [
-                Text(
-                  description,
-                ),
+                description != null
+                    ? Text(
+                        description,
+                      )
+                    : SizedBox(),
                 widget1 ?? SizedBox(),
                 widget2 ?? SizedBox(),
               ],

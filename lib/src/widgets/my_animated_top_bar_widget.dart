@@ -4,6 +4,7 @@ import 'package:purus_lern_app/src/config/palette.dart';
 import 'package:purus_lern_app/src/features/chatbot/data/chatbot_current_message.dart';
 import 'package:purus_lern_app/src/features/chatbot/presentation/chatbot_messages_text_widget.dart';
 import 'package:purus_lern_app/src/features/chatbot/presentation/chatbot_screen.dart';
+import 'package:purus_lern_app/src/widgets/my_opacity_route.dart';
 
 class MyAnimatedTopBarWidget extends StatelessWidget
     implements PreferredSizeWidget {
@@ -14,7 +15,7 @@ class MyAnimatedTopBarWidget extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
+      width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
           color: Colors.transparent,
           border:
@@ -41,13 +42,9 @@ class MyAnimatedTopBarWidget extends StatelessWidget
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          ChatbotScreen(firstRequest: chatbotCurrentMessage),
-                    ),
-                  );
+                  Navigator.of(context).push(myOpacityRoute(
+                    ChatbotScreen(firstRequest: chatbotCurrentMessage),
+                  ));
                 },
                 child: Lottie.asset(
                   "assets/animations/chatbot.json",

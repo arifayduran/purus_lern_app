@@ -23,6 +23,7 @@ import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/onb
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
 import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/stay_logged_in_sharedpref.dart';
+import 'package:purus_lern_app/src/features/chatbot/data/shared_prefs/daily_prompts_sharedpref.dart';
 import 'package:purus_lern_app/src/widgets/my_cupertino_dialog.dart';
 import 'package:purus_lern_app/src/widgets/my_snack_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -276,6 +277,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   debugPrint("-------------");
                 },
                 child: const Text("Reset Onboarding")),
+            TextButton(
+                onPressed: () {
+                  DailyPromptsSharedPrefs().resetDailyPrompts();
+                },
+                child: const Text("reset daily prompt 50")),
             TextButton(
                 onPressed: () async {
                   biometricAskedBeforeAndNo = false;

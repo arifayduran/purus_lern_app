@@ -11,9 +11,19 @@ import "package:purus_lern_app/src/features/chatbot/application/openai_apikey.da
 class ChatbotService {
   final String _apiUrl = "https://api.openai.com/v1/chat/completions";
 
+  List<Map<String, String>> messageHistory = [
+    {
+      "role": "system",
+      "content":
+          "Du Heisst Purutus. Du bist ein Pflegehelfer-Lern-Chatbot von Purus Medical Academy GmbH in Berlin. Beantworte Fragen nur im Zusammenhang mit Pflegehelfer-Lern-Themen, wie z.B. Patientenpflege, Notfallmaßnahmen und Pflegemanagement. Du kannst nur Deutsch. Sei Nett und gerne aus Lustig. Der Nutzer heisst ${currentUser!.firstname}. Max 300 Tokens pro promt."
+    }
+  ];
+
   Future<String> getResponse(
       BuildContext context, bool isMounted, String userMessage) async {
     try {
+      messageHistory.add({"role": "user", "content": userMessage});
+
       final response = await http.post(
         Uri.parse(_apiUrl),
         headers: {
@@ -22,22 +32,18 @@ class ChatbotService {
         },
         body: jsonEncode({
           "model": "gpt-3.5-turbo",
-          "messages": [
-            {
-              "role": "system",
-              "content":
-                  "Du Heisst Purutus. Du bist ein Pflegehelfer-Lern-Chatbot von Purus Medical Academy GmbH in Berlin. Beantworte Fragen nur im Zusammenhang mit Pflegehelfer-Lern-Themen, wie z.B. Patientenpflege, Notfallmaßnahmen und Pflegemanagement. Du kannst nur Deutsch. Sei Nett und gerne aus Lustig. Der Nutzer heisst ${currentUser!.firstname}. Max 300 Tokens pro promt"
-            },
-            {"role": "user", "content": userMessage}
-          ],
+          "messages": messageHistory,
           "max_tokens": 300,
         }),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        // decrementDailyPrompt();
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        return data["choices"][0]["message"]["content"].toString();
+        final botResponse = data["choices"][0]["message"]["content"].toString();
+
+        messageHistory.add({"role": "assistant", "content": botResponse});
+
+        return botResponse;
       } else {
         // if (isMounted) {
         //   // ignore: use_build_context_synchronously
