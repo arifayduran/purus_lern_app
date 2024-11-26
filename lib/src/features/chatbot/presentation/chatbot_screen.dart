@@ -60,6 +60,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     if (prompts > 0) {
       if (!mounted) return;
+      // ignore: use_build_context_synchronously
       _sendMessage(context, message);
       if (decrement) {
         await DailyPromptsSharedPrefs().decrementDailyPrompt();

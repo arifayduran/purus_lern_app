@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter_svg/svg.dart';
 import 'package:purus_lern_app/src/config/palette.dart';
 import 'package:purus_lern_app/src/features/mainmenu/domain/menu_card_class.dart';

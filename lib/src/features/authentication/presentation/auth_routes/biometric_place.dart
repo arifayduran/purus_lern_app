@@ -149,6 +149,7 @@ class _BiometricPlaceState extends State<BiometricPlace>
                       height: 300,
                       child: SvgPicture.asset(
                         localAuthAssets[availableBiometricsString]!,
+                        // ignore: deprecated_member_use
                         color: Colors.white,
                         alignment: Alignment.center,
                         height: 80,

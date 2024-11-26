@@ -1294,6 +1294,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                                                           ? SvgPicture.asset(
                                                               localAuthAssets[
                                                                   availableBiometricsString]!,
+                                                              // ignore: deprecated_member_use
                                                               color:
                                                                   Colors.white,
                                                               alignment:
