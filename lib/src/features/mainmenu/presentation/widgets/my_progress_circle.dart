@@ -83,11 +83,11 @@ class _MyProgressCircleState extends State<MyProgressCircle>
             },
           ),
         ),
-        TextButton(
-            onPressed: () {
-              progressNotifier.value += 0.05;
-            },
-            child: const Text("progress test +5%")),
+        // TextButton(
+        //     onPressed: () {
+        //       progressNotifier.value += 0.05;
+        //     },
+        //     child: const Text("progress test +5%")),
       ],
     );
   }

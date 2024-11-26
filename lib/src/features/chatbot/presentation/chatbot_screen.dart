@@ -4,13 +4,15 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:lottie/lottie.dart';
 import 'package:purus_lern_app/src/config/gradients.dart';
 import 'package:purus_lern_app/src/config/palette.dart';
+import 'package:purus_lern_app/src/core/firebase/firebase_analytics/log_errors.dart';
 import 'package:purus_lern_app/src/core/random_string.dart';
 import 'package:purus_lern_app/src/features/authentication/data/current_user.dart';
 import 'package:purus_lern_app/src/features/chatbot/application/chatbot_service.dart';
-import 'package:purus_lern_app/src/features/chatbot/data/chatbot_user_firestore_messages.dart';
+import 'package:purus_lern_app/src/features/chatbot/data/chatbot_user_firestore_chat_sessions.dart';
 import 'package:purus_lern_app/src/features/chatbot/data/shared_prefs/daily_prompts_sharedpref.dart';
 import 'package:purus_lern_app/src/features/chatbot/presentation/daily_prompt_widget.dart';
 import 'package:purus_lern_app/src/widgets/my_blur_gradient.dart';
+import 'package:purus_lern_app/src/widgets/my_snack_bar.dart';
 // import 'package:purus_lern_app/src/widgets/my_cupertino_dialog.dart';
 
 class ChatbotScreen extends StatefulWidget {
@@ -22,23 +24,23 @@ class ChatbotScreen extends StatefulWidget {
 }
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
-  final List<types.Message> _messages = [];
+  List<types.Message> _messages = [];
+  List<types.Message> _saveMessages = [];
   final _user = types.User(id: currentUser!.id);
   final _bot = const types.User(id: "Purutus", firstName: "Purutus");
   final _admin = const types.User(id: "Admin", role: types.Role.admin);
 
   final ChatbotService _chatbotService = ChatbotService();
-  final ChatbotUserFirestoreMessages _firestoreService =
-      ChatbotUserFirestoreMessages();
+  final ChatbotUserFirestoreChatSessions _firestoreService =
+      ChatbotUserFirestoreChatSessions();
   String? _currentChatId;
 
   bool _isWaitingResponse = false;
+  bool _isSavingChat = false;
 
   @override
   void initState() {
     super.initState();
-
-    _initializeChatSession();
 
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
@@ -71,6 +73,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         text:
             "Entschuldige bitte, ${currentUser!.firstname}. Dein Prompt-Guthaben ist aufgebraucht. Es wird heute Nacht um 00:00 Uhr automatisch zurückgesetzt. Melde dich gerne bei der Purus Medical Akademie. Vielen Dank für dein Verständnis, ich bin morgen wieder für dich da! 😊",
       );
+      setState(() {
+        _isWaitingResponse = false;
+      });
       _addMessage(noPromptsMessage);
 
       // await _sendMessage(
@@ -90,6 +95,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
 
     if (!mounted) return;
+    setState(() {
+      _isWaitingResponse = false;
+    });
+
     _addMessage(botResponse);
   }
 
@@ -97,11 +106,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     if (!mounted) return;
     setState(() {
       _messages.insert(0, message);
-      _isWaitingResponse = false;
     });
   }
 
   void _handleSendPressed(types.PartialText message) async {
+    setState(() {
+      _isWaitingResponse = true;
+    });
     FocusManager.instance.primaryFocus?.unfocus();
     final textMessage = types.TextMessage(
       author: _user,
@@ -119,6 +130,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         text:
             "Deine Nachricht ist zu Lang, versuche unter 100 Zeichen zu bleiben.",
       );
+      setState(() {
+        _isWaitingResponse = false;
+      });
+
       _addMessage(tooLongMessage);
     } else {
       _addMessage(textMessage);
@@ -126,17 +141,25 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     }
   }
 
-  Future<void> _initializeChatSession() async {
-    _currentChatId = await _firestoreService.createChatSession(currentUser!.id);
-  }
+  // Future<void> _initializeChatSession() async {
+  //   try {
+  //     _currentChatId =
+  //         await _firestoreService.createChatSession(currentUser!.id);
+  //   } catch (e) {
+  //     logErrors(e.toString());
+  //     debugPrint("Fehler bei der Chat ID vergabe: $e");
+  //   }
+  // }
 
   Future<void> _finalizeChat() async {
     String theme;
     try {
       theme = await _chatbotService.getResponse(context, mounted,
-          "Fasse das Thema des Chats in einem Satz zusammen. Wenn nicht gebe 'Unbekanntes Thema' zurück.");
+          "Fasse das Thema des Chats als Überschrift zusammen. Wenn nicht gebe 'Unbekanntes Thema' zurück.");
     } catch (e) {
-      theme = 'Unbekanntes Thema';
+      logErrors(e.toString());
+      theme = "Unbekanntes Thema";
+      debugPrint("Fehler bei der Themen vergabe: $e");
     }
     if (_currentChatId != null) {
       await _firestoreService.updateChatTheme(_currentChatId!, theme);
@@ -145,25 +168,27 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   Future<void> _saveChatSession() async {
     try {
-      _finalizeChat();
+      // await _initializeChatSession();
+      await _finalizeChat();
 
-      for (var message in _messages) {
+      for (var message in _saveMessages) {
         await _firestoreService.saveMessage(
-            chatId: _currentChatId!, message: message);
+            userId: _currentChatId!, message: message);
+      }
+      if (mounted) {
+        mySnackbar(context, "Der Chatverlauf wurde gespeichert.");
       }
     } catch (e) {
+      logErrors(e.toString());
       debugPrint("Fehler beim Speichern des Chats: $e");
+      if (!mounted) return;
+      mySnackbar(context, "Der Chatverlauf konnte nicht gespeichert werden.");
     }
   }
 
   @override
   void dispose() {
     FocusManager.instance.primaryFocus?.unfocus();
-
-    if (_messages.length >= 2) {
-      _saveChatSession();
-    }
-
     super.dispose();
   }
 
@@ -199,7 +224,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     ),
                     Text(
                       _isWaitingResponse
-                          ? "Purutus schreibt dir gerade..."
+                          ? _isSavingChat
+                              ? "Purutus speichert dein Chatverlauf..."
+                              : "Purutus schreibt dir gerade..."
                           : "Keine Nachrichten im Chat",
                       style: TextStyle(
                         color: Colors.white,
@@ -318,18 +345,20 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               child: IconButton(
                 highlightColor: purusLightGreen,
                 onPressed: () async {
-                  // if (_messages.length >= 2 && _currentChatId != null) {
-                  //   _saveChatSession();
-                  // }
+                  _saveMessages = _messages;
+                  _messages = [];
+                  if (_saveMessages.length >= 2) {
+                    setState(() {
+                      _isWaitingResponse = true;
+                      _isSavingChat = true;
+                    });
+                    await _saveChatSession();
+                    // ignore: use_build_context_synchronously
+                    Navigator.of(context).pop();
+                  } else {
+                    Navigator.of(context).pop();
+                  }
 
-                  // if (_messages.length >= 2) {
-                  //   await _firestoreService.createChatSession(currentUser!.id);
-                  //   await _firestoreService.updateChatTheme(
-                  //       _currentChatId!, theme);
-                  Navigator.of(context).pop();
-                  // } else {
-                  //   Navigator.of(context).pop();
-                  // }
                   // myCupertinoDialog(
                   //     context,
                   //     "Chatverlauf Löschen?",
@@ -375,10 +404,3 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 }
-
-
-
-// chat hafizza
-// firestore
-// lööschen
-// datum düzelt

@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
-import "package:purus_lern_app/src/config/palette.dart";
 import "package:purus_lern_app/src/features/chatbot/data/shared_prefs/daily_prompts_sharedpref.dart";
 
 class DailyPromptWidget extends StatefulWidget {

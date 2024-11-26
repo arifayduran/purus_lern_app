@@ -155,43 +155,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
-            ElevatedButton(
-                onPressed: () async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  await prefs.setBool("isFirstUsage", true);
-                },
-                child: Text("Reset isFirstUsage")),
             TextButton(
               onPressed: () {
                 getAppInfo();
               },
               child: Text("get app info"),
-            ),
-            Row(
-              children: [
-                SizedBox(
-                    height: 20,
-                    width: 110,
-                    child: TextField(
-                      controller: _tempPrintUserInfoController,
-                    )),
-                ElevatedButton(
-                    onPressed: () async {
-                      loadingValueNotifierBlur.value = true;
-                      loadingValueNotifierBlurOpacity.value = 0.3;
-                      loadingValueNotifierAnimation.value = true;
-                      loadingValueNotifierText.value =
-                          'Ladet Userdaten von "${_tempPrintUserInfoController.text}"...';
-                      await getUserinfoFromLogin(
-                          _tempPrintUserInfoController.text);
-                      loadingValueNotifierBlur.value = false;
-                      loadingValueNotifierBlurOpacity.value = 0.3;
-                      loadingValueNotifierAnimation.value = false;
-                      loadingValueNotifierText.value = "";
-                    },
-                    child: Text("Print user info from logininput")),
-              ],
             ),
             Column(
               children: [
@@ -406,6 +374,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               ),
             ),
+            Row(
+              children: [
+                SizedBox(
+                    height: 20,
+                    width: 110,
+                    child: TextField(
+                      controller: _tempPrintUserInfoController,
+                    )),
+                ElevatedButton(
+                    onPressed: () async {
+                      loadingValueNotifierBlur.value = true;
+                      loadingValueNotifierBlurOpacity.value = 0.3;
+                      loadingValueNotifierAnimation.value = true;
+                      loadingValueNotifierText.value =
+                          'Ladet Userdaten von "${_tempPrintUserInfoController.text}"...';
+                      await getUserinfoFromLogin(
+                          _tempPrintUserInfoController.text);
+                      loadingValueNotifierBlur.value = false;
+                      loadingValueNotifierBlurOpacity.value = 0.3;
+                      loadingValueNotifierAnimation.value = false;
+                      loadingValueNotifierText.value = "";
+                    },
+                    child: Text("Print user info from logininput")),
+              ],
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.setBool("isFirstUsage", true);
+                },
+                child: Text("Reset isFirstUsage")),
           ],
         ),
       ),
