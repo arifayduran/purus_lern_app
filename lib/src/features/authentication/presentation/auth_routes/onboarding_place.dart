@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purus_lern_app/src/core/firebase/firebase_analytics/log_onboarding_done_or_skiped.dart';
-import 'package:purus_lern_app/src/features/authentication/data/shared_pref/onboarding_status_sharedpref.dart';
+import 'package:purus_lern_app/src/features/authentication/data/shared_prefs/onboarding_status_sharedpref.dart';
 import 'package:purus_lern_app/src/features/authentication/data/login_conditions.dart';
 import 'package:purus_lern_app/src/features/authentication/domain/onboarding_place_model.dart';
 
@@ -100,10 +100,13 @@ class _OnboardingPlaceState extends State<OnboardingPlace> {
                   TextButton(
                       onPressed: () async {
                         await OnboardingStatusSharedpref()
-                            .setOnboardingStatusSharedpref(true);
+                            .setOnboardingStatusSharedpref(false);
+                        debugPrint("-------------");
+                        debugPrint("isOnboardingNotComplete: false");
+                        debugPrint("-------------");
                         await logOnboardingSkipped();
-                        if (isFaceIdConfigured) {
-                          widget.transitionToRoute('FaceId');
+                        if (isBiometricsConfigured) {
+                          widget.transitionToRoute("Biometric");
                         } else {
                           widget.transitionToRoute('Login');
                         }
@@ -116,10 +119,13 @@ class _OnboardingPlaceState extends State<OnboardingPlace> {
                     onPressed: () async {
                       if (_currentPage == widget.pages.length - 1) {
                         await OnboardingStatusSharedpref()
-                            .setOnboardingStatusSharedpref(true);
+                            .setOnboardingStatusSharedpref(false);
+                        debugPrint("-------------");
+                        debugPrint("isOnboardingNotComplete: false");
+                        debugPrint("-------------");
                         await logOnboardingDone();
-                        if (isFaceIdConfigured) {
-                          widget.transitionToRoute('FaceId');
+                        if (isBiometricsConfigured) {
+                          widget.transitionToRoute("Biometric");
                         } else {
                           widget.transitionToRoute('Login');
                         }

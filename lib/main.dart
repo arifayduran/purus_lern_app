@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:purus_lern_app/src/core/app_info.dart';
+import 'package:purus_lern_app/src/data/app_info.dart';
 import 'package:purus_lern_app/src/core/main_initialize.dart';
 import 'package:purus_lern_app/src/features/authentication/presentation/splash_gradient_animation.dart';
+// import 'package:scaled_app/scaled_app.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // ScaledWidgetsFlutterBinding.ensureInitialized(
+  //   scaleFactor: (deviceSize) {
+  //     const double widthOfDesign = 393;
+  //     return deviceSize.width / widthOfDesign;
+  //   },
+  // );
 
+  WidgetsFlutterBinding.ensureInitialized();
   await initializeApp();
 
   runApp(const PurusMain());

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:purus_lern_app/src/core/app_info.dart';
+import 'package:purus_lern_app/src/data/app_info.dart';
 
 Future<void> getAppInfo() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();

@@ -89,12 +89,12 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "purus_lern_app" "\0"
+            VALUE "CompanyName", "Purus Medical Academy" "\0"
+            VALUE "FileDescription", "Pflegehelfer Lern App, von Purus Medical Academy Berlin." "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "purus_lern_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "purus_lern_app.exe" "\0"
+            VALUE "InternalName", "Purus Lern App" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 Purus Medical Academy All rights reserved." "\0"
+            VALUE "OriginalFilename", "puruslernapp.exe" "\0"
             VALUE "ProductName", "purus_lern_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

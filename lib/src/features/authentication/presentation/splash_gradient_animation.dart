@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:purus_lern_app/src/config/gradients.dart';
 import 'package:purus_lern_app/src/config/palette.dart';
 import 'package:purus_lern_app/src/core/firebase/firebase_analytics/log_tried_skipping_splash.dart';
+import 'package:purus_lern_app/src/features/authentication/application/play_splash_sound.dart';
 import 'package:purus_lern_app/src/features/authentication/presentation/splash_screen.dart';
 
 class SplashGradientAnimation extends StatefulWidget {
@@ -20,6 +21,7 @@ class _SplashGradientAnimationState extends State<SplashGradientAnimation>
   @override
   void initState() {
     super.initState();
+    playSplashSound();
 
     _gradientAnimationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 2));

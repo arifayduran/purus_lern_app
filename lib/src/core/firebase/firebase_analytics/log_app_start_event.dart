@@ -1,4 +1,4 @@
-import "package:purus_lern_app/src/core/app_info.dart";
+import "package:purus_lern_app/src/data/app_info.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/analytics_instance.dart";
 import "package:purus_lern_app/src/features/authentication/data/login_conditions.dart";
 
@@ -13,13 +13,14 @@ Future<void> logAppStartEvent() async {
         "buildNumber": buildNumber,
         "buildSignature": buildSignature,
         "installerStore": installerStore,
-        "isLoggedIn": isLoggedIn.toString(),
+        "isAutoLoggedIn": isAutoLoggedIn.toString(),
         "isOnboardingNotComplete": isOnboardingNotComplete.toString(),
-        "isFaceIdConfigured": isFaceIdConfigured.toString(),
-        "faceIdAskedBeforeAndNo": faceIdAskedBeforeAndNo.toString(),
-        "isBiometricAvailable": isBiometricAvailable.value.toString(),
+        "isBiometricsConfigured": isBiometricsConfigured.toString(),
+        "biometricAskedBeforeAndNo": biometricAskedBeforeAndNo.toString(),
+        "isBiometricsAvailable": isBiometricsAvailable.value.toString(),
         "isDeviceSupportedForBiometric":
             isDeviceSupportedForBiometric.value.toString(),
+        "availableBiometricsString": availableBiometricsString.toString(),
         // "os_version": "12.4.5",
         // "device_model": "iPhone 13 Pro",
         // "app_language": "en",

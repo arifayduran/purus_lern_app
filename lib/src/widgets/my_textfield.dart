@@ -39,6 +39,7 @@ class MyTextfield extends StatelessWidget {
     this.isDence = false,
     this.showCursor = true,
     this.inputFormatters,
+    this.autofillHints,
   });
 
   final Color bgColor;
@@ -74,6 +75,7 @@ class MyTextfield extends StatelessWidget {
   final bool isDence;
   final bool showCursor;
   final List<TextInputFormatter>? inputFormatters;
+  final Iterable<String>? autofillHints;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +113,7 @@ class MyTextfield extends StatelessWidget {
         textCapitalization: capitalization,
         textAlign: textAlign,
         cursorColor: cursorColor,
+        autofillHints: autofillHints,
         decoration: InputDecoration(
           prefix: prefix,
           suffix: suffix,

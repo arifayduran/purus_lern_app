@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:purus_lern_app/firebase_options.dart';
-import 'package:purus_lern_app/src/core/app_info.dart';
+import 'package:purus_lern_app/src/data/app_info.dart';
 import 'package:purus_lern_app/src/core/firebase/firebase_analytics/analytics_instance.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 

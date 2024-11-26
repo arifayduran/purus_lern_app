@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:purus_lern_app/src/config/my_text_styles.dart';
+import 'package:lottie/lottie.dart';
 import 'package:purus_lern_app/src/config/palette.dart';
+import 'package:purus_lern_app/src/features/chatbot/data/chatbot_current_message.dart';
+import 'package:purus_lern_app/src/features/chatbot/presentation/chatbot_messages_text_widget.dart';
+import 'package:purus_lern_app/src/features/chatbot/presentation/chatbot_screen.dart';
+import 'package:purus_lern_app/src/widgets/my_opacity_route.dart';
 
 class MyAnimatedTopBarWidget extends StatelessWidget
     implements PreferredSizeWidget {
@@ -11,7 +15,7 @@ class MyAnimatedTopBarWidget extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
+      width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
           color: Colors.transparent,
           border:
@@ -22,54 +26,38 @@ class MyAnimatedTopBarWidget extends StatelessWidget
             child: SizedBox(),
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Expanded(
-                flex: 2,
-                child: SizedBox(),
+              Expanded(child: SizedBox()),
+              Column(
+                children: [
+                  SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                      height: 80,
+                      width: 240,
+                      child: ChatbotMessagesTextWidget()),
+                ],
               ),
-              Material(
-                color: purusGrey,
-                elevation: 6,
-                shadowColor: Colors.black,
-                clipBehavior: Clip.hardEdge,
-                shape: const CircleBorder(),
-                child: SizedBox(
-                    height: 80,
-                    width: 80,
-                    child: Image.asset(
-                      "assets/images/Ellipse64.png",
-                      fit: BoxFit.cover,
-                    )),
-              ),
-              const SizedBox(
-                width: 30,
-              ),
-              const SizedBox(
-                height: 80,
-                width: 200,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Willkommen",
-                      style: MyTextStyles.mainTitle,
-                    ),
-                    Text(
-                      "Herr Arif Ayduran!",
-                      style: MyTextStyles.subTitle,
-                    ),
-                  ],
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(myOpacityRoute(
+                    ChatbotScreen(firstRequest: chatbotCurrentMessage),
+                  ));
+                },
+                child: Lottie.asset(
+                  "assets/animations/chatbot.json",
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.contain,
                 ),
               ),
-              const Expanded(
-                flex: 3,
-                child: SizedBox(),
-              ),
+              Expanded(child: SizedBox()),
             ],
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
         ],
       ),
@@ -77,5 +65,5 @@ class MyAnimatedTopBarWidget extends StatelessWidget
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(120);
+  Size get preferredSize => const Size.fromHeight(100);
 }

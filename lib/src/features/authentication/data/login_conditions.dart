@@ -1,14 +1,13 @@
-// Route bedingt
 import 'package:flutter/material.dart';
 
-bool isLoggedIn = false;
+// Route bedingt
+bool isAutoLoggedIn = false;
 bool isOnboardingNotComplete = true;
-bool isFaceIdConfigured = false;
+bool isBiometricsConfigured = false;
 
-
-bool faceIdAskedBeforeAndNo = false;
+bool biometricAskedBeforeAndNo = false;
 
 // UI bedingt
-ValueNotifier<bool> isBiometricAvailable = ValueNotifier<bool>(false);
+ValueNotifier<bool> isBiometricsAvailable = ValueNotifier<bool>(false);
 ValueNotifier<bool> isDeviceSupportedForBiometric = ValueNotifier<bool>(false);
-
+late String availableBiometricsString;

@@ -2,18 +2,19 @@ import "package:flutter/material.dart";
 import "package:purus_lern_app/src/config/gradients.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_tried_skipping_splash.dart";
 import "package:purus_lern_app/src/core/presentation/rive_manager.dart";
+import "package:purus_lern_app/src/data/main_conditions.dart";
 import "package:purus_lern_app/src/features/authentication/data/login_conditions.dart";
 import "package:purus_lern_app/src/features/authentication/domain/onboarding_place_model.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/forgot_password_place.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/registration_confirm_place.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/registration_place.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/reset_password_place.dart";
-import "package:purus_lern_app/src/features/authentication/presentation/splash_bubbles_background.dart";
+import "package:purus_lern_app/src/widgets/my_bubbles_background.dart";
 import "package:purus_lern_app/src/widgets/my_animated_bottom_bar_widget.dart";
 import "package:rive/rive.dart";
 import "package:purus_lern_app/src/core/presentation/home_screen.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/onboarding_place.dart";
-import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/faceid_place.dart";
+import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/biometric_place.dart";
 import "package:purus_lern_app/src/features/authentication/presentation/auth_routes/login_place.dart";
 
 class SplashScreen extends StatefulWidget {
@@ -91,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         ],
       ),
-      "FaceId": FaceidPlace(transitionToRoute: _transitionToRoute),
+      "Biometric": BiometricPlace(transitionToRoute: _transitionToRoute),
       "Login": LoginPlace(transitionToRoute: _transitionToRoute),
       "ForgotPassword":
           ForgotPasswordPlace(transitionToRoute: _transitionToRoute),
@@ -115,27 +116,29 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 4500));
 
     if (mounted) {
-      if (isLoggedIn) {
-        _routeAnimationController.forward();
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: const HomeScreen(),
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 1200),
-          ),
-        );
+      if (isAutoLoggedIn) {
+        if (isBiometricsAvailable.value && isBiometricsConfigured) {
+          setState(() {
+            placeRouteNotifier.value = "Biometric";
+          });
+        } else {
+          _routeAnimationController.forward();
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: const HomeScreen(),
+                );
+              },
+              transitionDuration: const Duration(milliseconds: 1200),
+            ),
+          );
+        }
       } else {
-        if (isOnboardingNotComplete) {
+        if (isOnboardingNotComplete || isFirstUsage) {
           setState(() {
             placeRouteNotifier.value = "Onboarding";
-          });
-        } else if (isBiometricAvailable.value && isFaceIdConfigured) {
-          setState(() {
-            placeRouteNotifier.value = "FaceId";
           });
         } else {
           setState(() {
@@ -174,7 +177,13 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: MyBackgroundGradient().myBackgroundGradient(),
         child: Stack(
           children: [
-            const SplashBubblesBackground(),
+            Positioned(
+              top: 0,
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  width: MediaQuery.of(context).size.width,
+                  child: const MyBubblesBackground()),
+            ),
             Scaffold(
               // resizeToAvoidBottomInset: false,
               backgroundColor: Colors.transparent,

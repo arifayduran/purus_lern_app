@@ -34,11 +34,11 @@ class _MyProgressCircleState extends State<MyProgressCircle>
     });
   }
 
-  // @override
-  // void dispose() {
-  //   _circleAnimationController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _circleAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,11 +83,11 @@ class _MyProgressCircleState extends State<MyProgressCircle>
             },
           ),
         ),
-        TextButton(
-            onPressed: () {
-              progressNotifier.value += 0.05;
-            },
-            child: const Text("progress test +5%")),
+        // TextButton(
+        //     onPressed: () {
+        //       progressNotifier.value += 0.05;
+        //     },
+        //     child: const Text("progress test +5%")),
       ],
     );
   }

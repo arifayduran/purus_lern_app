@@ -177,9 +177,9 @@ class _ResetPasswordPlaceState extends State<ResetPasswordPlace> {
     }
   }
 
-  IconData _showHideIcon(bool obscureText) {
-    return obscureText ? SFIcons.sf_eye_fill : SFIcons.sf_eye_slash_fill;
-  }
+  // IconData _showHideIcon(bool obscureText) {
+  //   return obscureText ? SFIcons.sf_eye_fill : SFIcons.sf_eye_slash_fill;
+  // }
 
   @override
   void dispose() {
@@ -236,20 +236,29 @@ class _ResetPasswordPlaceState extends State<ResetPasswordPlace> {
                   keyboardType: TextInputType.visiblePassword,
                   textInputAction: TextInputAction.next,
                   suffix: GestureDetector(
-                    onTapDown: (_) {
+                    onTap: () {
                       setState(() {
-                        _obscureTextOne = false;
-                        _showHideIcon(_obscureTextOne);
+                        _obscureTextOne = !_obscureTextOne;
+                        // _showHideIcon(_obscureTextOne);
                       });
                     },
-                    onTapUp: (_) {
-                      setState(() {
-                        _obscureTextOne = true;
-                        _showHideIcon(_obscureTextOne);
-                      });
-                    },
+                    // onTapDown: (_) {
+                    //   setState(() {
+                    //     _obscureTextOne = false;
+                    //   //  _showHideIcon(_obscureTextOne);
+                    //   });
+                    // },
+                    // onTapUp: (_) {
+                    //   setState(() {
+                    //     _obscureTextOne = true;
+                    //   //  _showHideIcon(_obscureTextOne);
+                    //   });
+                    // },
                     child: SFIcon(
-                      _showHideIcon(_obscureTextOne),
+                      // _showHideIcon(_obscureTextOne),
+                      _obscureTextOne
+                          ? SFIcons.sf_eye_fill
+                          : SFIcons.sf_eye_slash_fill,
                       color: purusGrey,
                       fontSize: 16,
                     ),
@@ -292,20 +301,29 @@ class _ResetPasswordPlaceState extends State<ResetPasswordPlace> {
                         keyboardType: TextInputType.visiblePassword,
                         textInputAction: TextInputAction.next,
                         suffix: GestureDetector(
-                          onTapDown: (_) {
+                          onTap: () {
                             setState(() {
-                              _obscureTextTwo = false;
-                              _showHideIcon(_obscureTextTwo);
+                              _obscureTextTwo = !_obscureTextTwo;
+                              //  _showHideIcon(_obscureTextTwo);
                             });
                           },
-                          onTapUp: (_) {
-                            setState(() {
-                              _obscureTextTwo = true;
-                              _showHideIcon(_obscureTextTwo);
-                            });
-                          },
+                          // onTapDown: (_) {
+                          //   setState(() {
+                          //     _obscureTextTwo = false;
+                          //   //  _showHideIcon(_obscureTextTwo);
+                          //   });
+                          // },
+                          // onTapUp: (_) {
+                          //   setState(() {
+                          //     _obscureTextTwo = true;
+                          //   //  _showHideIcon(_obscureTextTwo);
+                          //   });
+                          // },
                           child: SFIcon(
-                            _showHideIcon(_obscureTextTwo),
+                            // _showHideIcon(_obscureTextTwo),
+                            _obscureTextTwo
+                                ? SFIcons.sf_eye_fill
+                                : SFIcons.sf_eye_slash_fill,
                             color: purusGrey,
                             fontSize: 16,
                           ),
@@ -330,20 +348,29 @@ class _ResetPasswordPlaceState extends State<ResetPasswordPlace> {
                         keyboardType: TextInputType.visiblePassword,
                         textInputAction: TextInputAction.done,
                         suffix: GestureDetector(
-                          onTapDown: (_) {
+                          onTap: () {
                             setState(() {
-                              _obscureTextThree = false;
-                              _showHideIcon(_obscureTextThree);
+                              _obscureTextThree = !_obscureTextThree;
+                              //  _showHideIcon(_obscureTextThree);
                             });
                           },
-                          onTapUp: (_) {
-                            setState(() {
-                              _obscureTextThree = true;
-                              _showHideIcon(_obscureTextThree);
-                            });
-                          },
+                          // onTapDown: (_) {
+                          //   setState(() {
+                          //     _obscureTextThree = false;
+                          //   //  _showHideIcon(_obscureTextThree);
+                          //   });
+                          // },
+                          // onTapUp: (_) {
+                          //   setState(() {
+                          //     _obscureTextThree = true;
+                          //    // _showHideIcon(_obscureTextThree);
+                          //   });
+                          // },
                           child: SFIcon(
-                            _showHideIcon(_obscureTextThree),
+                            // _showHideIcon(_obscureTextThree),
+                            _obscureTextThree
+                                ? SFIcons.sf_eye_fill
+                                : SFIcons.sf_eye_slash_fill,
                             color: purusGrey,
                             fontSize: 16,
                           ),
