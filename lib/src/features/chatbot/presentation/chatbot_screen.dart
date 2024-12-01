@@ -15,6 +15,9 @@ import 'package:purus_lern_app/src/widgets/my_blur_gradient.dart';
 import 'package:purus_lern_app/src/widgets/my_snack_bar.dart';
 // import 'package:purus_lern_app/src/widgets/my_cupertino_dialog.dart';
 
+
+// SHARED KALDIK EN SON
+
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key, required this.firstRequest});
   final String firstRequest;
