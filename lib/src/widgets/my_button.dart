@@ -87,13 +87,13 @@ class _MyButtonState extends State<MyButton> {
             shadows: [
               if (isPressed)
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
+                  color: Colors.black.withValues(alpha: 0.25),
                   blurRadius: 20,
                   offset: const Offset(2, 10),
                 )
               else
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   blurRadius: 20,
                   offset: const Offset(2, 10),
                 ),
@@ -130,7 +130,7 @@ class _MyButtonState extends State<MyButton> {
                       fontWeight: FontWeight.w500,
                       shadows: [
                         Shadow(
-                            color: widget.textColor.withOpacity(0.5),
+                            color: widget.textColor.withValues(alpha: 0.5),
                             blurRadius: 10,
                             offset: const Offset(1, 1))
                       ],
@@ -176,12 +176,12 @@ class _ButtonPainter extends CustomPainter {
 
     if (isPressed) {
       final shadowPaint = Paint()
-        ..color = Colors.black.withOpacity(0.25)
+        ..color = Colors.black.withValues(alpha: 0.25)
         ..maskFilter = const MaskFilter.blur(BlurStyle.inner, 10);
       canvas.drawRRect(rrect, shadowPaint);
     } else {
       final shadowPaint = Paint()
-        ..color = Colors.white.withOpacity(0.25)
+        ..color = Colors.white.withValues(alpha: 0.25)
         ..maskFilter = const MaskFilter.blur(BlurStyle.inner, 10);
       canvas.drawRRect(rrect, shadowPaint);
     }
