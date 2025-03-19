@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_sficon/flutter_sficon.dart";
 import "package:flutter_svg/svg.dart";
+import "package:lottie/lottie.dart";
 import "package:purus_lern_app/src/config/palette.dart";
 import "package:purus_lern_app/src/config/const_stay_logged_in_days.dart";
 import "package:purus_lern_app/src/core/firebase/firebase_analytics/log_any.dart";
@@ -55,6 +56,7 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   bool _stayLoggedBox = false;
 
   String _loginResponse = "";
+  bool _isValidating = false;
   bool _isUsernameValid = false;
   bool _isPasswordValid = false;
 
@@ -125,9 +127,15 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
   void _validation(BuildContext context) async {
     if (_usernameController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
+      setState(() {
+        _isValidating = true;
+      });
       _loginResponse = await loginReq(
           context, mounted, _usernameController.text, _passwordController.text);
     }
+    setState(() {
+      _isValidating = false;
+    });
 
     if (_loginResponse == "valid") {
       _isUsernameValid = true;
@@ -340,7 +348,15 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
       });
       logErrors(_alertText);
     } else {
-      if (!_isUsernameValid && !_isPasswordValid) {
+      if (_loginResponse == "error") {
+        setState(() {
+          _alertText = "Unbekannter Fehler!";
+          _alertTextColor = purusRed;
+          _myTextfieldUsernameStrokeColor = purusGrey;
+          _myTextfieldPassswordStrokeColor = purusGrey;
+        });
+        logErrors(_alertText);
+      } else if (!_isUsernameValid && !_isPasswordValid) {
         setState(() {
           _alertText = "Ungültige Anmeldedaten.\nVersuchen Sie es noch einmal!";
           _alertTextColor = purusRed;
@@ -348,32 +364,6 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
           _myTextfieldPassswordStrokeColor = purusRed;
         });
         logErrors(_alertText);
-      } else if (_loginResponse == "error") {
-        setState(() {
-          _alertText = "Fehler!";
-          _alertTextColor = purusRed;
-          _myTextfieldUsernameStrokeColor = purusGrey;
-          _myTextfieldPassswordStrokeColor = purusGrey;
-        });
-        logErrors(_alertText);
-        // }
-        // if (!_isUsernameValid) {
-        //   setState(() {
-        //     _alertText = "Benutzername oder E-Mail nicht gefunden.";
-        //     _alertTextColor = purusRed;
-        //     _myTextfieldUsernameStrokeColor = purusRed;
-        //     _myTextfieldPassswordStrokeColor = purusGrey;
-        //   });
-        //   logErrors(_alertText);
-        // } else if (_isUsernameValid && !_isPasswordValid) {
-        //   setState(() {
-        //     _alertText =
-        //         "Falsches Passwort. Probieren Sie es erneut, oder setzen Sie Ihr Passwort zurück.";
-        //     _alertTextColor = purusRed;
-        //     _myTextfieldUsernameStrokeColor = purusGrey;
-        //     _myTextfieldPassswordStrokeColor = purusRed;
-        //   });
-        //   logErrors(_alertText);
       } else if (_isUsernameValid && _isPasswordValid) {
         setState(() {
           _alertText = "Erfolgreich Angemeldet.";
@@ -391,6 +381,24 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
       }
     }
   }
+  // }
+  // if (!_isUsernameValid) {
+  //   setState(() {
+  //     _alertText = "Benutzername oder E-Mail nicht gefunden.";
+  //     _alertTextColor = purusRed;
+  //     _myTextfieldUsernameStrokeColor = purusRed;
+  //     _myTextfieldPassswordStrokeColor = purusGrey;
+  //   });
+  //   logErrors(_alertText);
+  // } else if (_isUsernameValid && !_isPasswordValid) {
+  //   setState(() {
+  //     _alertText =
+  //         "Falsches Passwort. Probieren Sie es erneut, oder setzen Sie Ihr Passwort zurück.";
+  //     _alertTextColor = purusRed;
+  //     _myTextfieldUsernameStrokeColor = purusGrey;
+  //     _myTextfieldPassswordStrokeColor = purusRed;
+  //   });
+  //   logErrors(_alertText);
 
   void _askStayLoggedInAfterLogin(BuildContext context) {
     if (mounted) {
@@ -987,16 +995,20 @@ class _LoginPlaceState extends State<LoginPlace> with TickerProviderStateMixin {
                           SizedBox(
                             height: 45,
                             child: Center(
-                              child: Text(
-                                _alertText,
-                                overflow: TextOverflow.fade,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: _alertTextColor,
-                                ),
-                              ),
+                              child: _isValidating
+                                  ? LottieBuilder.asset(
+                                      "assets/animations/loading_heartbeat_freq_white.json",
+                                    )
+                                  : Text(
+                                      _alertText,
+                                      overflow: TextOverflow.fade,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: _alertTextColor,
+                                      ),
+                                    ),
                             ),
                           ),
                           SizedBox(

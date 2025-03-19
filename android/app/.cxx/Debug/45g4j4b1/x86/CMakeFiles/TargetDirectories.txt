@@ -1,0 +1,2 @@
+/Volumes/DATEN/development/VSCode/Flutter/purus_lern_app/android/app/.cxx/Debug/45g4j4b1/x86/CMakeFiles/edit_cache.dir
+/Volumes/DATEN/development/VSCode/Flutter/purus_lern_app/android/app/.cxx/Debug/45g4j4b1/x86/CMakeFiles/rebuild_cache.dir
