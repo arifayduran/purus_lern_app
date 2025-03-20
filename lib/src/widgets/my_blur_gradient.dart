@@ -10,6 +10,7 @@ class MyBlurGradient extends StatelessWidget {
     required this.blurTotal,
     this.endColor = Colors.transparent,
     this.reverse = false,
+    this.totalGeneration = 20,
   });
 
   final Color startColor;
@@ -18,6 +19,7 @@ class MyBlurGradient extends StatelessWidget {
   final double height;
   final double width;
   final bool reverse;
+  final int totalGeneration;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +33,10 @@ class MyBlurGradient extends StatelessWidget {
         ),
       ),
       child: Column(
-        children: List.generate(8, (index) {
-          final double sigma = blurTotal * (1 - (index / 7).clamp(0.0, 1.0));
+        children: List.generate(totalGeneration, (index) {
+          final double sigma = reverse
+              ? blurTotal * (index / totalGeneration).clamp(0.0, 1.0)
+              : blurTotal * (1 - (index / totalGeneration).clamp(0.0, 1.0));
 
           return Expanded(
             child: ClipRRect(
@@ -50,6 +54,7 @@ class MyBlurGradient extends StatelessWidget {
     );
   }
 }
+
 
 
 

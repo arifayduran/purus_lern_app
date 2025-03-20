@@ -13,7 +13,13 @@ void main() async {
   // );
 
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeApp();
+
+  try {
+    await initializeApp();
+  } catch (e) {
+    debugPrint('Error during app initialization: $e');
+    return;
+  }
 
   runApp(const PurusMain());
 }
@@ -25,7 +31,7 @@ class PurusMain extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: appName,
-      home: SplashGradientAnimation(),
+      home: const SplashGradientAnimation(),
       debugShowCheckedModeBanner: false,
     );
   }

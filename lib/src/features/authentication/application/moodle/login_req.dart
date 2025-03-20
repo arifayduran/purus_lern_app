@@ -6,6 +6,7 @@ import "dart:convert";
 import "package:purus_lern_app/src/core/moodle/moodle_config.dart";
 import "package:purus_lern_app/src/features/authentication/data/current_user.dart";
 import "package:purus_lern_app/src/widgets/my_snack_bar.dart";
+import 'dart:async';
 
 const String _endpoint = "login/token.php";
 
@@ -21,7 +22,9 @@ Future<String> loginReq(BuildContext context, bool isMounted, String username,
         "password": password,
         "service": "moodle_mobile_app",
       },
-    );
+    ).timeout(const Duration(seconds: 7));
+
+    await Future.delayed(const Duration(seconds: 2));
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final responseData = json.decode(response.body);
@@ -56,6 +59,17 @@ Future<String> loginReq(BuildContext context, bool isMounted, String username,
       }
       return "error";
     }
+    // } on TimeoutException catch (_) {
+    //   // Handle timeout specifically
+    //   logErrors("Timeout while connecting to server.");
+    //   debugPrint("-------------");
+    //   debugPrint("Timeout while connecting to server.");
+    //   debugPrint("-------------");
+    //   if (isMounted) {
+    //     // ignore: use_build_context_synchronously
+    //     mySnackbar(context, "Zeitüberschreitung beim Verbinden zum Server.");
+    //   }
+    //   return "error";
   } catch (e) {
     logErrors(e.toString());
     debugPrint("-------------");

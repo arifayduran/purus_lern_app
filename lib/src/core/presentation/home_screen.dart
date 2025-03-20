@@ -274,8 +274,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                       child: ValueListenableBuilder(
                         valueListenable: loadingValueNotifierBlurOpacity,
-                        builder: (context, value, child) =>
-                            Container(color: Colors.black.withOpacity(value)),
+                        builder: (context, value, child) => Container(
+                            color: Colors.black.withValues(alpha: value)),
                       ),
                     ),
                   );

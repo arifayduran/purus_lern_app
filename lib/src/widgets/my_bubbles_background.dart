@@ -106,8 +106,8 @@ class BubblesPainter extends CustomPainter {
     for (var bubble in bubbles) {
       bubble.update(animationValue);
       final paint = Paint()
-        ..color =
-            const Color.fromARGB(255, 19, 164, 118).withOpacity(bubble.opacity)
+        ..color = const Color.fromARGB(255, 19, 164, 118)
+            .withValues(alpha: bubble.opacity)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40.0);
       final x = bubble.x * size.width;
       final y = bubble.y * size.height;
