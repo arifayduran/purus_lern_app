@@ -24,7 +24,7 @@ Future<String> loginReq(BuildContext context, bool isMounted, String username,
       },
     ).timeout(const Duration(seconds: 7));
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final responseData = json.decode(response.body);
